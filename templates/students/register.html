@@ -1,0 +1,1289 @@
+{% extends "base.html" %}
+
+{% block title %}Student Registration - Ramat Utsav{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 20px;
+    }
+    
+    .page-header h1 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+    }
+    
+    .selection-panel {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        font-size: 0.95em;
+    }
+    
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        font-size: 1em;
+    }
+    
+    .group-selection {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .group-option {
+        flex: 1;
+        min-width: 120px;
+    }
+    
+    .group-option input[type="radio"] {
+        display: none;
+    }
+    
+    .group-option label {
+        display: block;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: white;
+    }
+    
+    .group-option input[type="radio"]:checked + label {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    
+    .group-info {
+        margin-top: 10px;
+        padding: 10px;
+        background: #e3f2fd;
+        border-radius: 6px;
+        font-size: 0.9em;
+        display: none;
+    }
+    
+    .group-info.active {
+        display: block;
+    }
+    
+    .stats-bar {
+        background: #fff3cd;
+        padding: 12px 15px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        display: none;
+        font-size: 0.95em;
+        color: #856404;
+    }
+    
+    .stats-bar.active {
+        display: block;
+    }
+    
+    .locked-notice {
+        background: #d4edda;
+        border: 2px solid #c3e6cb;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        display: none;
+    }
+    
+    .locked-notice.active {
+        display: block;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+        margin-top: 20px;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9em;
+        min-width: 800px;
+    }
+    
+    /* Base th style */
+    th {
+        background: #007bff;
+        color: white;
+        padding: 10px 8px;
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #000000;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    /* Student info columns + Action column - grey background */
+    th.student-info {
+        background: #6c757d !important;
+        color: white;
+    }
+    
+    /* Section headers */
+    th.section-header {
+        font-size: 0.85em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+    
+    th.section-individual {
+        background: #17a2b8 !important;
+        color: white;
+    }
+    
+    th.section-team {
+        background: #ffc107 !important;
+        color: #333;
+    }
+    
+    th.section-baudhik {
+        background: #28a745 !important;
+        color: white;
+    }
+    
+    /* Game name headers (second row) */
+    th.individual-game {
+        background: #17a2b8 !important;
+        color: white;
+    }
+    
+    th.team-game {
+        background: #ffc107 !important;
+        color: #333;
+    }
+    
+    th.baudhik-game {
+        background: #28a745 !important;
+        color: white;
+    }
+    
+    /* Data cells - light tinted backgrounds */
+    td.individual-game {
+        background: #eef7fa !important;  /* Light cyan */
+    }
+    
+    td.team-game {
+        background: #fffbe6 !important;  /* Light yellow */
+    }
+    
+    td.baudhik-game {
+        background: #e8f5e9 !important;  /* Light green */
+    }
+    
+    td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        background: white;
+    }
+    
+    /* Hover effects - preserve tint but slightly darken */
+    tbody tr:hover td.individual-game {
+        background: #d4ebf2 !important;
+    }
+    
+    tbody tr:hover td.team-game {
+        background: #fff3c4 !important;
+    }
+    
+    tbody tr:hover td.baudhik-game {
+        background: #c8e6c9 !important;
+    }
+    
+    tbody tr:hover td:not([class*="game"]) {
+        background: #f5f5f5 !important;
+    }
+    
+    /* Existing student rows - subtle blue, preserve game tints */
+    tbody tr.existing-student td:not([class*="game"]) {
+        background: #f0f8ff !important;
+    }
+    
+    tbody tr.existing-student:hover td:not([class*="game"]) {
+        background: #e6f2ff !important;
+    }
+    
+    tbody tr.existing-student td.individual-game {
+        background: #e1f0f8 !important;
+    }
+    
+    tbody tr.existing-student td.team-game {
+        background: #fff8d6 !important;
+    }
+    
+    tbody tr.existing-student td.baudhik-game {
+        background: #dcedc8 !important;
+    }
+    
+    .row-number {
+        text-align: center;
+        font-weight: 600;
+        color: #666;
+    }
+    
+    input[type="text"],
+    input[type="date"],
+    select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.95em;
+    }
+    
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    select:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+    
+    input[type="text"]:disabled,
+    input[type="date"]:disabled,
+    select:disabled {
+        background: #e9ecef;
+        cursor: not-allowed;
+    }
+    
+    input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+    
+    input[type="checkbox"]:disabled {
+        cursor: not-allowed;
+    }
+    
+    .game-cell {
+        text-align: center;
+        min-width: 60px;
+    }
+    
+    .team-cell {
+        min-width: 150px;
+    }
+    
+    .team-name-input {
+        display: none;
+    }
+    
+    .team-name-input.active {
+        display: block;
+        margin-top: 5px;
+    }
+    
+    .btn-delete {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85em;
+    }
+    
+    .btn-delete:hover {
+        background: #c82333;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 2px solid #e0e0e0;
+    }
+    
+    .action-buttons .btn {
+        flex: 1;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #999;
+    }
+    
+    .loading {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+    }
+    
+    .required {
+        color: #dc3545;
+    }
+    
+    .validation-errors {
+        background: #f8d7da;
+        border: 2px solid #f5c6cb;
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 15px;
+        display: none;
+    }
+    
+    .validation-errors.active {
+        display: block;
+    }
+    
+    .validation-errors h3 {
+        color: #721c24;
+        margin-bottom: 10px;
+        font-size: 1.1em;
+    }
+    
+    .validation-errors ul {
+        margin: 0;
+        padding-left: 20px;
+        color: #721c24;
+    }
+    
+    .validation-errors li {
+        margin: 5px 0;
+    }
+    
+    @media (max-width: 768px) {
+        .group-selection {
+            flex-direction: column;
+        }
+        
+        table {
+            font-size: 0.85em;
+        }
+        
+        th, td {
+            padding: 6px 4px;
+        }
+    }
+.table-container {
+        overflow: auto;
+        max-height: 75vh; /* Limits height to make header freezing visible */
+        margin-top: 20px;
+        border: 1px solid #ddd;
+        position: relative;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: separate; /* Required for sticky borders to look right */
+        border-spacing: 0;
+        font-size: 0.9em;
+    }
+
+    /* --- STICKY HEADER LOGIC --- */
+    
+    /* Top row header */
+    #tableHeader tr:nth-child(1) th {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: #007bff;
+    }
+
+    /* Second row header */
+    #tableHeader tr:nth-child(2) th {
+        position: sticky;
+        top: 41px; /* Adjust based on the height of your first header row */
+        z-index: 100;
+    }
+
+    /* --- STICKY COLUMN LOGIC (Freeze up to Name) --- */
+    
+    /* Column 1: # Number */
+    td:nth-child(1), 
+    th:nth-child(1) {
+        position: sticky;
+        left: 0;
+        z-index: 101;
+        width: 40px;
+        min-width: 40px;
+        background: #f8f9fa;
+    }
+
+    /* Column 2: Name */
+    td:nth-child(2),
+    #tableHeader tr:nth-child(1) th:nth-child(2) {
+        position: sticky;
+        left: 40px; /* Offset by width of Column 1 */
+        z-index: 101;
+        min-width: 150px;
+        background: #f8f9fa;
+    }
+
+    /* Intersecting Corner (Header + Frozen Column) needs highest Z-Index */
+    #tableHeader tr:nth-child(1) th:nth-child(1),
+    #tableHeader tr:nth-child(1) th:nth-child(2) {
+        z-index: 102;
+    }
+
+    /* Backgrounds for frozen cells to prevent transparency */
+    tbody tr td:nth-child(1),
+    tbody tr td:nth-child(2) {
+        background-color: #ffffff !important;
+        border-right: 2px solid #007bff !important; /* Visual 'freeze' line */
+    }
+
+    tbody tr.existing-student td:nth-child(1),
+    tbody tr.existing-student td:nth-child(2) {
+        background-color: #f0f8ff !important;
+    }
+
+    /* --- THIN TEAM COLUMNS --- */
+    
+    /* Target the Team Name Header */
+    th.team-game:nth-child(even) {
+        width: 30px !important;
+        min-width: 30px !important;
+        max-width: 30px !important;
+        overflow: hidden;
+        text-overflow: clip;
+        font-size: 10px;
+        padding: 2px;
+    }
+
+    /* Target the Team Name Input Cell */
+    .team-cell {
+        width: 30px !important;
+        min-width: 30px !important;
+        padding: 2px !important;
+        transition: width 0.3s ease;
+    }
+
+    .team-name-input {
+        width: 100% !important;
+        padding: 4px 2px !important;
+        border: 1px solid transparent;
+        text-align: center;
+    }
+
+    /* Expand the column when the user clicks into the input */
+    .team-cell:focus-within {
+        width: 150px !important;
+        min-width: 150px !important;
+        position: relative;
+        z-index: 10;
+        background: white !important;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    /* --- MOBILE ADJUSTMENTS --- */
+    @media (max-width: 768px) {
+        .table-container {
+            max-height: 60vh;
+        }
+        /* Reduce name column width on mobile to save space */
+        td:nth-child(2),
+        #tableHeader tr:nth-child(1) th:nth-child(2) {
+            min-width: 100px;
+        }
+    }
+
+    /* [Rest of your existing CSS for buttons, colors, etc.] */
+    th { border: 1px solid #000; padding: 10px 8px; text-align: center; }
+    td { border: 1px solid #ddd; padding: 8px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Student Registration</h1>
+    <p style="color: #666; font-size: 0.9em;">Register and manage students for competitions</p>
+</div>
+
+<!-- CRITICAL: Only show sanskarvargs that current user has access to -->
+<div class="selection-panel">
+    <div class="form-group">
+        <label for="sanskarvarg">Sanskarvarg <span class="required">*</span></label>
+        <select id="sanskarvarg" required {% if request.args.get('sanskarvarg') %}disabled{% endif %}>
+            <option value="">-- Select Sanskarvarg --</option>
+            {% for s in sanskarvargs %}
+            <option value="{{ s.id }}" {% if request.args.get('sanskarvarg')|int == s.id %}selected{% endif %}>
+                {{ s.name }}
+            </option>
+            {% endfor %}
+        </select>
+        {% if sanskarvargs|length == 0 %}
+        <p style="color: #dc3545; margin-top: 8px; font-size: 0.9em;">
+            ⚠️ No sanskarvargs assigned to you. Please contact administrator.
+        </p>
+        {% endif %}
+    </div>
+    
+    <div class="form-group">
+        <label>Group <span class="required">*</span></label>
+        <div class="group-selection">
+            {% for g in groups %}
+            <div class="group-option">
+                <input type="radio" name="group" id="group_{{ g.id }}" value="{{ g.id }}"
+                       data-std-from="{{ g.standard_from }}"
+                       data-std-to="{{ g.standard_to }}"
+                       {% if request.args.get('group')|int == g.id %}checked{% endif %}
+                       {% if request.args.get('group') %}disabled{% endif %}>
+                <label for="group_{{ g.id }}">
+                    <strong>Group {{ g.name }}</strong><br>
+                    <small>Std {{ g.standard_from }}-{{ g.standard_to }}</small>
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+        <div id="groupInfo" class="group-info"></div>
+    </div>
+</div>
+
+<div id="lockedNotice" class="locked-notice">
+    <strong>🔒 This registration is locked (submitted).</strong><br>
+    All fields are read-only. To make changes, please unlock this submission from the
+    <a href="/submissions">Submissions page</a>.
+</div>
+
+<div id="validationErrors" class="validation-errors">
+    <h3>⚠️ Validation Errors</h3>
+    <ul id="errorsList"></ul>
+</div>
+
+<div id="statsBar" class="stats-bar">
+    <strong>📊 Currently:</strong> <span id="existingCount">0</span> existing student(s),
+    <span id="newCount">0</span> new student(s)
+</div>
+
+<div id="registrationForm" style="display: none;">
+    <div class="table-container">
+        <table id="studentTable">
+            <thead id="tableHeader">
+                <!-- Headers will be dynamically generated -->
+            </thead>
+            <tbody id="studentTableBody">
+                <!-- Student rows will be added here -->
+            </tbody>
+        </table>
+    </div>
+    
+    <div style="margin-top: 15px;" id="addStudentBtnContainer">
+        <button type="button" class="btn" onclick="addStudentRow()">+ Add New Student</button>
+    </div>
+    
+    <div class="action-buttons" id="actionButtons">
+        <button type="button" class="btn btn-secondary" onclick="saveStudents()">💾 Save</button>
+        <button type="button" class="btn" onclick="submitStudents()">✅ Submit Final</button>
+    </div>
+</div>
+
+<div id="loadingState" class="loading" style="display: none;">
+    Loading data...
+</div>
+
+<div id="emptyState" class="empty-state">
+    <p>Please select Sanskarvarg and Group to start registration</p>
+</div>
+
+<script>
+    let currentEvents = [];
+    let currentGroup = null;
+    let currentSanskarvargId = null;
+    let rowCount = 0;
+    let existingStudents = [];
+    let isLocked = false;
+    let individualEvents = [];
+    let teamEvents = [];
+    let baudhikEvents = [];
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const preSelectedSanskarvarg = urlParams.get('sanskarvarg');
+    const preSelectedGroup = urlParams.get('group');
+    
+    if (preSelectedSanskarvarg && preSelectedGroup) {
+        document.getElementById('sanskarvarg').value = preSelectedSanskarvarg;
+        const groupRadio = document.getElementById(`group_${preSelectedGroup}`);
+        if (groupRadio) {
+            groupRadio.checked = true;
+            groupRadio.dispatchEvent(new Event('change'));
+        }
+    }
+    
+    document.querySelectorAll('input[name="group"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const groupId = this.value;
+            const stdFrom = this.dataset.stdFrom;
+            const stdTo = this.dataset.stdTo;
+            
+            currentGroup = {
+                id: groupId,
+                stdFrom: parseInt(stdFrom),
+                stdTo: parseInt(stdTo)
+            };
+            
+            const groupInfo = document.getElementById('groupInfo');
+            groupInfo.innerHTML = `Standard range: ${stdFrom} to ${stdTo}. All students must be in this range.`;
+            groupInfo.classList.add('active');
+            
+            loadDataForGroup(groupId);
+        });
+    });
+    
+    async function loadDataForGroup(groupId) {
+        const sanskarvargId = document.getElementById('sanskarvarg').value;
+        
+        if (!sanskarvargId) {
+            alert('Please select a Sanskarvarg first');
+            return;
+        }
+        
+        currentSanskarvargId = parseInt(sanskarvargId);
+        
+        document.getElementById('loadingState').style.display = 'block';
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('registrationForm').style.display = 'none';
+        document.getElementById('statsBar').classList.remove('active');
+        document.getElementById('validationErrors').classList.remove('active');
+        
+        try {
+            // Check submission status with permission check
+            const statusResponse = await fetch(`/api/submission-status/${sanskarvargId}/${groupId}`);
+            if (statusResponse.status === 403) {
+                const errorData = await statusResponse.json();
+                alert('Permission Denied: ' + (errorData.error || 'You do not have access to this sanskarvarg'));
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('emptyState').innerHTML = '<p style="color: #dc3545;">❌ Permission Denied: You do not have access to this sanskarvarg</p>';
+                document.getElementById('emptyState').style.display = 'block';
+                return;
+            }
+            
+            const statusData = await statusResponse.json();
+            isLocked = statusData.is_submitted;
+            
+            if (isLocked) {
+                document.getElementById('lockedNotice').classList.add('active');
+                document.getElementById('addStudentBtnContainer').style.display = 'none';
+                document.getElementById('actionButtons').style.display = 'none';
+            } else {
+                document.getElementById('lockedNotice').classList.remove('active');
+                document.getElementById('addStudentBtnContainer').style.display = 'block';
+                document.getElementById('actionButtons').style.display = 'flex';
+            }
+            
+            // Load games
+            const gamesResponse = await fetch(`/api/games-for-group/${groupId}`);
+            const games = await gamesResponse.json();
+            
+            if (games.length === 0) {
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('emptyState').innerHTML = '<p>No games scheduled for this group yet. Please create game events first.</p>';
+                document.getElementById('emptyState').style.display = 'block';
+                return;
+            }
+            
+            // Flatten into events
+            currentEvents = [];
+            individualEvents = [];
+            teamEvents = [];
+            baudhikEvents = [];
+            
+            games.forEach(game => {
+                game.events.forEach(event => {
+                    const eventData = {
+                        id: event.id,
+                        game_name: game.name,
+                        game_type: game.game_type,
+                        game_id: game.id,
+                        gender_restriction: event.gender_restriction,
+                        is_team: game.is_team,
+                        location: event.location,
+                        date: event.date,
+                        time: event.time,
+                        display_name: `${game.name} - ${getGenderBadge(event.gender_restriction)}`
+                    };
+                    
+                    currentEvents.push(eventData);
+                    
+                    if (game.game_type === 'Individual') {
+                        individualEvents.push(eventData);
+                    } else if (game.game_type === 'Team') {
+                        teamEvents.push(eventData);
+                    } else if (game.game_type === 'Baudhik') {
+                        baudhikEvents.push(eventData);
+                    }
+                });
+            });
+            
+            // Load students with permission check
+            const studentsResponse = await fetch(`/api/students-by-group?sanskarvarg_id=${sanskarvargId}&group_id=${groupId}`);
+            if (studentsResponse.status === 403) {
+                const errorData = await studentsResponse.json();
+                alert('Permission Denied: ' + (errorData.error || 'You do not have access to students from this sanskarvarg'));
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('emptyState').innerHTML = '<p style="color: #dc3545;">❌ Permission Denied</p>';
+                document.getElementById('emptyState').style.display = 'block';
+                return;
+            }
+            
+            const students = await studentsResponse.json();
+            existingStudents = students;
+            
+            updateTableHeader();
+            document.getElementById('studentTableBody').innerHTML = '';
+            rowCount = 0;
+            
+            if (students && students.length > 0) {
+                students.forEach(student => {
+                    addExistingStudentRow(student);
+                });
+            }
+            
+            if (!isLocked) {
+                addStudentRow();
+            }
+            
+            updateStats();
+            
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('registrationForm').style.display = 'block';
+            document.getElementById('statsBar').classList.add('active');
+            
+        } catch (error) {
+            console.error('Error loading data:', error);
+            alert('Error loading data: ' + error.message);
+            document.getElementById('loadingState').style.display = 'none';
+        }
+    }
+    
+    function getGenderBadge(genderRestriction) {
+        if (genderRestriction === 'Male') return '♂️ Male';
+        if (genderRestriction === 'Female') return '♀️ Female';
+        return '⚥ Mixed';
+    }
+
+    function updateTableHeader() {
+        const thead = document.getElementById('tableHeader');
+        thead.innerHTML = '';
+        
+        const row1 = document.createElement('tr');
+        row1.innerHTML = `
+            <th rowspan="2" class="student-info" style="width: 40px;">#</th>
+            <th rowspan="2" class="student-info" style="min-width: 150px;">Name <span class="required">*</span></th>
+            <th rowspan="2" class="student-info" style="width: 100px;">Gender <span class="required">*</span></th>
+            <th rowspan="2" class="student-info" style="width: 100px;">Standard <span class="required">*</span></th>
+            <th rowspan="2" class="student-info" style="width: 140px;">DOB <span class="required">*</span></th>
+        `;
+        
+        if (individualEvents.length > 0) {
+            const th = document.createElement('th');
+            th.className = 'section-header section-individual';
+            th.colSpan = individualEvents.length;
+            th.textContent = '🏃 INDIVIDUAL GAMES';
+            row1.appendChild(th);
+        }
+        
+        if (teamEvents.length > 0) {
+            const th = document.createElement('th');
+            th.className = 'section-header section-team';
+            th.colSpan = teamEvents.length * 2;
+            th.textContent = '👥 TEAM GAMES';
+            row1.appendChild(th);
+        }
+        
+        if (baudhikEvents.length > 0) {
+            const th = document.createElement('th');
+            th.className = 'section-header section-baudhik';
+            th.colSpan = baudhikEvents.length;
+            th.textContent = '🧠 BAUDHIK';
+            row1.appendChild(th);
+        }
+        
+        if (!isLocked) {
+            const th = document.createElement('th');
+            th.rowSpan = 2;
+            th.className = 'student-info';
+            th.style.width = '80px';
+            th.textContent = 'Action';
+            row1.appendChild(th);
+        }
+        
+        thead.appendChild(row1);
+        
+        const row2 = document.createElement('tr');
+        
+        individualEvents.forEach(event => {
+            const th = document.createElement('th');
+            th.className = 'individual-game';
+            th.textContent = event.display_name;
+            th.style.minWidth = '140px';
+            row2.appendChild(th);
+        });
+        
+        teamEvents.forEach(event => {
+            const checkTh = document.createElement('th');
+            checkTh.className = 'team-game';
+            checkTh.textContent = event.display_name;
+            checkTh.style.minWidth = '140px';
+            row2.appendChild(checkTh);
+            
+            const teamTh = document.createElement('th');
+            teamTh.className = 'team-game';
+            teamTh.textContent = 'Team Name';
+            teamTh.style.minWidth = '120px';
+            row2.appendChild(teamTh);
+        });
+        
+        baudhikEvents.forEach(event => {
+            const th = document.createElement('th');
+            th.className = 'baudhik-game';
+            th.textContent = event.display_name;
+            th.style.minWidth = '140px';
+            row2.appendChild(th);
+        });
+        
+        thead.appendChild(row2);
+    }
+
+    function addExistingStudentRow(student) {
+        rowCount++;
+        const tbody = document.getElementById('studentTableBody');
+        const row = document.createElement('tr');
+        row.classList.add('existing-student');
+        row.dataset.studentId = student.id;
+        row.dataset.isExisting = 'true';
+    
+        let html = `
+            <td class="row-number">${rowCount}</td>
+            <td><input type="text" class="student-name" value="${student.name}" required ${isLocked ? 'disabled' : ''}></td>
+            <td>
+                <select class="student-gender" required ${isLocked ? 'disabled' : ''} onchange="handleGenderChange(this)">
+                    <option value="Male" ${student.gender === 'Male' ? 'selected' : ''}>Male</option>
+                    <option value="Female" ${student.gender === 'Female' ? 'selected' : ''}>Female</option>
+                </select>
+            </td>
+            <td>
+                <select class="student-standard" required ${isLocked ? 'disabled' : ''}>
+                    ${generateStandardOptions(student.standard)}
+                </select>
+            </td>
+            <td><input type="date" class="student-dob" value="${student.date_of_birth}" required ${isLocked ? 'disabled' : ''}></td>
+        `;
+    
+        individualEvents.forEach(event => {
+            const participation = student.participations.find(p => p.game_event_id === event.id);
+            const canParticipate = event.gender_restriction === 'Mixed' || event.gender_restriction === student.gender;
+            
+            html += `
+                <td class="game-cell individual-game">
+                    <input type="checkbox" class="game-check"
+                           data-event-id="${event.id}"
+                           data-gender-restriction="${event.gender_restriction}"
+                           data-is-team="false"
+                           ${participation ? 'checked' : ''}
+                           ${!canParticipate || isLocked ? 'disabled' : ''}>
+                </td>
+            `;
+        });
+        
+        teamEvents.forEach(event => {
+            const participation = student.participations.find(p => p.game_event_id === event.id);
+            const canParticipate = event.gender_restriction === 'Mixed' || event.gender_restriction === student.gender;
+            
+            html += `
+                <td class="game-cell team-game">
+                    <input type="checkbox" class="game-check"
+                           data-event-id="${event.id}"
+                           data-gender-restriction="${event.gender_restriction}"
+                           data-is-team="true"
+                           ${participation ? 'checked' : ''}
+                           ${!canParticipate || isLocked ? 'disabled' : ''}
+                           onchange="toggleTeamName(this)">
+                </td>
+                <td class="team-cell team-game">
+                    <input type="text" class="team-name-input ${participation ? 'active' : ''}"
+                           data-event-id="${event.id}"
+                           placeholder="Team Name"
+                           value="${participation ? participation.team_name || '' : ''}"
+                           ${participation && canParticipate ? '' : 'disabled'}
+                           ${isLocked ? 'disabled' : ''}>
+                </td>
+            `;
+        });
+        
+        baudhikEvents.forEach(event => {
+            const participation = student.participations.find(p => p.game_event_id === event.id);
+            const canParticipate = event.gender_restriction === 'Mixed' || event.gender_restriction === student.gender;
+            
+            html += `
+                <td class="game-cell baudhik-game">
+                    <input type="checkbox" class="game-check"
+                           data-event-id="${event.id}"
+                           data-gender-restriction="${event.gender_restriction}"
+                           data-is-team="false"
+                           ${participation ? 'checked' : ''}
+                           ${!canParticipate || isLocked ? 'disabled' : ''}>
+                </td>
+            `;
+        });
+        
+        if (!isLocked) {
+            html += `
+                <td style="text-align: center;">
+                    <button type="button" class="btn-delete" onclick="deleteStudent(${student.id}, this)">🗑️</button>
+                </td>
+            `;
+        }
+    
+        row.innerHTML = html;
+        tbody.appendChild(row);
+    }
+
+    function addStudentRow() {
+        rowCount++;
+        const tbody = document.getElementById('studentTableBody');
+        const row = document.createElement('tr');
+        row.dataset.isExisting = 'false';
+    
+        let html = `
+            <td class="row-number">${rowCount}</td>
+            <td><input type="text" class="student-name" placeholder="Full Name" required></td>
+            <td>
+                <select class="student-gender" required onchange="handleGenderChange(this)">
+                    <option value="">Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </td>
+            <td>
+                <select class="student-standard" required>
+                    <option value="">Select</option>
+                    ${generateStandardOptions()}
+                </select>
+            </td>
+            <td><input type="date" class="student-dob" required></td>
+        `;
+    
+        individualEvents.forEach(event => {
+            html += `
+                <td class="game-cell individual-game">
+                    <input type="checkbox" class="game-check"
+                           data-event-id="${event.id}"
+                           data-gender-restriction="${event.gender_restriction}"
+                           data-is-team="false"
+                           disabled>
+                </td>
+            `;
+        });
+        
+        teamEvents.forEach(event => {
+            html += `
+                <td class="game-cell team-game">
+                    <input type="checkbox" class="game-check"
+                           data-event-id="${event.id}"
+                           data-gender-restriction="${event.gender_restriction}"
+                           data-is-team="true"
+                           onchange="toggleTeamName(this)"
+                           disabled>
+                </td>
+                <td class="team-cell team-game">
+                    <input type="text" class="team-name-input"
+                           data-event-id="${event.id}"
+                           placeholder="Team Name"
+                           disabled>
+                </td>
+            `;
+        });
+        
+        baudhikEvents.forEach(event => {
+            html += `
+                <td class="game-cell baudhik-game">
+                    <input type="checkbox" class="game-check"
+                           data-event-id="${event.id}"
+                           data-gender-restriction="${event.gender_restriction}"
+                           data-is-team="false"
+                           disabled>
+                </td>
+            `;
+        });
+        
+        html += `
+            <td style="text-align: center;">
+                <button type="button" class="btn-delete" onclick="removeRow(this)">×</button>
+            </td>
+        `;
+    
+        row.innerHTML = html;
+        tbody.appendChild(row);
+        
+        updateStats();
+    }
+
+    function handleGenderChange(selectElement) {
+        const row = selectElement.closest('tr');
+        const selectedGender = selectElement.value;
+        
+        if (!selectedGender) {
+            row.querySelectorAll('.game-check').forEach(cb => {
+                cb.disabled = true;
+                cb.checked = false;
+            });
+            row.querySelectorAll('.team-name-input').forEach(input => {
+                input.disabled = true;
+                input.value = '';
+                input.classList.remove('active');
+            });
+            return;
+        }
+        
+        row.querySelectorAll('.game-check').forEach(cb => {
+            const restriction = cb.dataset.genderRestriction;
+            const can = restriction === 'Mixed' || restriction === selectedGender;
+            cb.disabled = !can;
+            if (!can && cb.checked) {
+                cb.checked = false;
+                if (cb.dataset.isTeam === 'true') {
+                    const teamInput = row.querySelector(`.team-name-input[data-event-id="${cb.dataset.eventId}"]`);
+                    if (teamInput) {
+                        teamInput.disabled = true;
+                        teamInput.value = '';
+                        teamInput.classList.remove('active');
+                    }
+                }
+            }
+        });
+    }
+
+    function generateStandardOptions(selectedStd = null) {
+        let options = '<option value="">Select</option>';
+        for (let i = 1; i <= 12; i++) {
+            const sel = selectedStd == i ? 'selected' : '';
+            options += `<option value="${i}" ${sel}>${i}</option>`;
+        }
+        return options;
+    }
+
+    function toggleTeamName(checkbox) {
+        const row = checkbox.closest('tr');
+        const eventId = checkbox.dataset.eventId;
+        const teamInput = row.querySelector(`.team-name-input[data-event-id="${eventId}"]`);
+        
+        if (checkbox.checked) {
+            teamInput.disabled = false;
+            teamInput.classList.add('active');
+            teamInput.required = true;
+        } else {
+            teamInput.disabled = true;
+            teamInput.classList.remove('active');
+            teamInput.required = false;
+            teamInput.value = '';
+        }
+    }
+
+    function removeRow(button) {
+        button.closest('tr').remove();
+        renumberRows();
+        updateStats();
+    }
+
+    async function deleteStudent(studentId, button) {
+        if (!confirm('Permanently delete this student? This cannot be undone.')) return;
+        
+        try {
+            const res = await fetch(`/students/delete/${studentId}`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                button.closest('tr').remove();
+                renumberRows();
+                updateStats();
+                alert(data.message);
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (err) {
+            alert('Error deleting student');
+        }
+    }
+
+    function renumberRows() {
+        document.querySelectorAll('#studentTableBody .row-number').forEach((cell, i) => {
+            cell.textContent = i + 1;
+        });
+        rowCount = document.querySelectorAll('#studentTableBody tr').length;
+    }
+
+    function updateStats() {
+        const rows = document.querySelectorAll('#studentTableBody tr');
+        let existing = 0, newStudents = 0;
+        rows.forEach(r => {
+            if (r.dataset.isExisting === 'true') existing++;
+            else if (r.querySelector('.student-name').value.trim()) newStudents++;
+        });
+        document.getElementById('existingCount').textContent = existing;
+        document.getElementById('newCount').textContent = newStudents;
+    }
+
+    function collectAllStudentsData() {
+        const rows = document.querySelectorAll('#studentTableBody tr');
+        const toUpdate = [], toCreate = [];
+        
+        rows.forEach(row => {
+            const name = row.querySelector('.student-name').value.trim();
+            const gender = row.querySelector('.student-gender').value;
+            const standard = parseInt(row.querySelector('.student-standard').value);
+            const dob = row.querySelector('.student-dob').value;
+            
+            if (!name && !gender && !standard && !dob) return;
+            
+            if (!name || !gender || !standard || !dob) {
+                throw new Error('Please fill all required fields for all students');
+            }
+            
+            if (standard < currentGroup.stdFrom || standard > currentGroup.stdTo) {
+                throw new Error(`Student "${name}" standard ${standard} is outside allowed range (${currentGroup.stdFrom}-${currentGroup.stdTo})`);
+            }
+            
+            const games = [];
+            row.querySelectorAll('.game-check:checked:not(:disabled)').forEach(cb => {
+                const eventId = parseInt(cb.dataset.eventId);
+                const isTeam = cb.dataset.isTeam === 'true';
+                let teamName = null;
+                if (isTeam) {
+                    const input = row.querySelector(`.team-name-input[data-event-id="${eventId}"]`);
+                    teamName = input.value.trim();
+                    if (!teamName) {
+                        const ev = currentEvents.find(e => e.id === eventId);
+                        throw new Error(`Team name required for ${ev.display_name} - student "${name}"`);
+                    }
+                }
+                games.push({ game_event_id: eventId, team_name: teamName });
+            });
+            
+            const data = { name, gender, standard, dob, games };
+            if (row.dataset.isExisting === 'true') {
+                data.id = parseInt(row.dataset.studentId);
+                toUpdate.push(data);
+            } else {
+                toCreate.push(data);
+            }
+        });
+        
+        return {
+            sanskarvarg_id: currentSanskarvargId,
+            group_id: parseInt(currentGroup.id),
+            students_to_update: toUpdate,
+            students_to_create: toCreate
+        };
+    }
+
+    async function saveStudents() {
+        try {
+            document.getElementById('validationErrors').classList.remove('active');
+            const data = collectAllStudentsData();
+            data.is_final_submit = false;
+            
+            if (data.students_to_update.length + data.students_to_create.length === 0) {
+                alert('No students to save');
+                return;
+            }
+            
+            const res = await fetch('/students/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            
+            if (result.success) {
+                alert(result.message);
+                loadDataForGroup(currentGroup.id);
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (err) {
+            alert('Validation error: ' + err.message);
+        }
+    }
+
+    async function submitStudents() {
+        try {
+            document.getElementById('validationErrors').classList.remove('active');
+            const data = collectAllStudentsData();
+            data.is_final_submit = true;
+            
+            const total = data.students_to_update.length + data.students_to_create.length;
+            if (total === 0) {
+                alert('No students to submit');
+                return;
+            }
+            
+            if (!confirm(`Submit final registration for ${total} student(s)? This will lock the form.`)) return;
+            
+            const res = await fetch('/students/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            if (!res.ok) {
+                const result = await res.json();
+                if (result.errors) {
+                    const list = document.getElementById('errorsList');
+                    list.innerHTML = '';
+                    result.errors.forEach(e => {
+                        const li = document.createElement('li');
+                        li.textContent = e;
+                        list.appendChild(li);
+                    });
+                    document.getElementById('validationErrors').classList.add('active');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    alert('Error: ' + (result.message || 'Unknown error'));
+                }
+                return;
+            }
+            
+            const result = await res.json();
+            alert(result.message);
+            window.location.href = '/submissions';
+        } catch (err) {
+            alert('Validation error: ' + err.message);
+        }
+    }
+
+    // Update stats when typing name in new rows
+    document.addEventListener('input', e => {
+        if (e.target.classList.contains('student-name')) updateStats();
+    });
+
+    // Prevent Enter from submitting forms accidentally
+    document.addEventListener('keypress', e => {
+        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault();
+    });
+</script>
+{% endblock %}

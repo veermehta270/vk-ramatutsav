@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Event-wise Results - Ramat Utsav{% endblock %}
+
+{% block extra_css %}
+<style>
+    .results-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+    
+    .results-header h1 {
+        margin: 0 0 5px 0;
+        font-size: 2em;
+    }
+    
+    .results-header .subtitle {
+        opacity: 0.9;
+        font-size: 1em;
+    }
+    
+    .actions-bar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        justify-content: flex-end;
+    }
+    
+    .results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .result-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .result-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .event-title {
+        font-size: 1.3em;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .event-meta {
+        display: flex;
+        gap: 15px;
+        font-size: 0.9em;
+        color: #666;
+    }
+    
+    .positions-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+    
+    .position-box {
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .position-box.first {
+        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+        color: #333;
+    }
+    
+    .position-box.second {
+        background: linear-gradient(135deg, #c0c0c0 0%, #e0e0e0 100%);
+        color: #333;
+    }
+    
+    .position-box.third {
+        background: linear-gradient(135deg, #cd7f32 0%, #e99a5c 100%);
+        color: #333;
+    }
+    
+    .position-box.empty {
+        background: #f5f5f5;
+        color: #999;
+    }
+    
+    .position-label {
+        font-weight: 600;
+        font-size: 0.9em;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+    
+    .position-label .medal {
+        font-size: 1.5em;
+    }
+    
+    .winner-name {
+        font-size: 1.1em;
+        font-weight: 500;
+    }
+    
+    .winner-points {
+        font-size: 0.85em;
+        margin-top: 5px;
+        opacity: 0.8;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+    
+    .empty-state-icon {
+        font-size: 4em;
+        margin-bottom: 20px;
+    }
+    
+    @media (max-width: 768px) {
+        .positions-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media print {
+        .actions-bar {
+            display: none;
+        }
+        
+        .result-card {
+            box-shadow: none;
+            border: 1px solid #ddd;
+            page-break-inside: avoid;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="results-header">
+    <h1>📋 Event-wise Results</h1>
+    <div class="subtitle">Complete Results for All Events</div>
+</div>
+
+<div class="actions-bar">
+    <a href="/results/student-leaderboard" class="btn btn-secondary">🏆 View Student Leaderboard</a>
+    <a href="/results/export-combined-pdf" class="btn btn-primary" target="_blank">📄 Export PDF</a>
+</div>
+
+{% if events_with_results %}
+    <div class="results-list">
+        {% for item in events_with_results %}
+        <div class="result-card">
+            <div class="result-card-header">
+                <div>
+                    <div class="event-title">{{ item.event.game.name }}</div>
+                    <div class="event-meta">
+                        <span>📍 {{ item.event.location.name }}</span>
+                        <span>👥 Group {{ item.event.group.name }}</span>
+                        <span> Gender {{ item.event.gender_restriction }}</span>
+                        <span>📅 {{ item.event.scheduled_date.strftime('%d %B %Y') }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="positions-grid">
+                <!-- First Position -->
+                <div class="position-box {% if item.first %}first{% else %}empty{% endif %}">
+                    <div class="position-label">
+                        <span class="medal">🥇</span>
+                        <span>First Place</span>
+                    </div>
+                    {% if item.first %}
+                        <div class="winner-name">{{ item.first.get_display_name() }}</div>
+                        <div class="winner-points">3 Points</div>
+                    {% else %}
+                        <div class="winner-name">Not Awarded</div>
+                    {% endif %}
+                </div>
+                
+                <!-- Second Position -->
+                <div class="position-box {% if item.second %}second{% else %}empty{% endif %}">
+                    <div class="position-label">
+                        <span class="medal">🥈</span>
+                        <span>Second Place</span>
+                    </div>
+                    {% if item.second %}
+                        <div class="winner-name">{{ item.second.get_display_name() }}</div>
+                        <div class="winner-points">2 Points</div>
+                    {% else %}
+                        <div class="winner-name">Not Awarded</div>
+                    {% endif %}
+                </div>
+                
+                <!-- Third Position -->
+                <div class="position-box {% if item.third %}third{% else %}empty{% endif %}">
+                    <div class="position-label">
+                        <span class="medal">🥉</span>
+                        <span>Third Place</span>
+                    </div>
+                    {% if item.third %}
+                        <div class="winner-name">{{ item.third.get_display_name() }}</div>
+                        <div class="winner-points">1 Point</div>
+                    {% else %}
+                        <div class="winner-name">Not Awarded</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📊</div>
+        <h2>No Results Yet</h2>
+        <p>No results have been recorded yet. Record event results to see them here.</p>
+        <a href="/game-events" class="btn" style="margin-top: 20px;">Go to Events</a>
+    </div>
+{% endif %}
+{% endblock %}

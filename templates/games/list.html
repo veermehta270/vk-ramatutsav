@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Games - Ramat Utsav{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 20px;
+    }
+    
+    .page-header h1 {
+        font-size: 1.5em;
+        margin-bottom: 15px;
+    }
+    
+    .games-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .game-card {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+    }
+    
+    .game-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .game-name {
+        font-size: 1.2em;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .game-type-badge {
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    
+    .badge-team {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .badge-individual {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .badge-baudhik {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .game-description {
+        color: #666;
+        margin-bottom: 10px;
+        font-size: 0.95em;
+    }
+    
+    .game-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        padding-top: 10px;
+        border-top: 1px solid #e0e0e0;
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    /* NEW: Action buttons styling */
+    .game-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .btn-small {
+        padding: 6px 12px;
+        font-size: 0.9em;
+        border-radius: 4px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .btn-edit {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-edit:hover {
+        background: #0056b3;
+    }
+    
+    .btn-delete {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .btn-delete:hover {
+        background: #c82333;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #999;
+    }
+    
+    .empty-state-icon {
+        font-size: 3em;
+        margin-bottom: 15px;
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 480px) {
+        .game-card {
+            padding: 12px;
+        }
+        
+        .game-header {
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .game-type-badge {
+            align-self: flex-start;
+        }
+        
+        .game-meta {
+            gap: 10px;
+            font-size: 0.85em;
+        }
+        
+        .game-actions {
+            flex-direction: column;
+        }
+        
+        .btn-small {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Games</h1>
+    <a href="/games/create" class="btn">+ Create New Game</a>
+</div>
+
+{% if games %}
+    <div class="games-list">
+        {% for game in games %}
+        <div class="game-card">
+            <div class="game-header">
+                <div class="game-name">{{ game.name }}</div>
+                <span class="game-type-badge badge-{{ game.game_type.lower() }}">
+                    {% if game.game_type == 'Team' %}👥 Team
+                    {% elif game.game_type == 'Individual' %}🏃 Individual
+                    {% else %}🧠 Baudhik
+                    {% endif %}
+                </span>
+            </div>
+            
+            {% if game.description %}
+            <div class="game-description">{{ game.description }}</div>
+            {% endif %}
+            
+            <div class="game-meta">
+                {% if game.is_team_game() %}
+                    <span class="meta-item">👤 Min: {{ game.min_team_size }} players</span>
+                    <span class="meta-item">👥 Max: {{ game.max_team_size }} players</span>
+                {% elif game.game_type == 'Individual' %}
+                    <span class="meta-item">📊 Capacity: {{ game.capacity_per_round }} per round</span>
+                {% elif game.game_type == 'Baudhik' %}
+                    {% if game.capacity_per_round %}
+                        <span class="meta-item">📊 Capacity: {{ game.capacity_per_round }} per round</span>
+                    {% else %}
+                        <span class="meta-item">📊 All students in one round</span>
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+            <!-- NEW: Action buttons for Edit and Delete -->
+            <div class="game-actions">
+                <a href="{{ url_for('edit_game', id=game.id) }}" class="btn-small btn-edit">
+                    ✏️ Edit
+                </a>
+                <form method="POST" action="{{ url_for('delete_game', id=game.id) }}" 
+                      style="display: inline; margin: 0;"
+                      onsubmit="return confirmDelete('{{ game.name }}', {{ game.game_events|length }})">
+                    <button type="submit" class="btn-small btn-delete">
+                        🗑️ Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">🎮</div>
+        <h2>No Games Yet</h2>
+        <p>Create your first game to get started</p>
+        <a href="/games/create" class="btn" style="margin-top: 20px;">+ Create First Game</a>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /**
+     * Confirm before deleting a game
+     * 
+     * TEACHING NOTES:
+     * 1. This JavaScript function is called when the form is submitted
+     * 2. The 'onsubmit' attribute in the form calls this function
+     * 3. If the function returns false, the form submission is cancelled
+     * 4. confirm() shows a native browser confirmation dialog
+     */
+    function confirmDelete(gameName, eventCount) {
+        let message = `Are you sure you want to delete "${gameName}"?`;
+        
+        // Add warning if there are related events
+        if (eventCount > 0) {
+            message += `\n\n⚠️ WARNING: This will also delete ${eventCount} related game event(s) and all their participations!`;
+        }
+        
+        message += '\n\nThis action cannot be undone.';
+        
+        // Show confirmation dialog and return the result
+        return confirm(message);
+    }
+</script>
+{% endblock %}

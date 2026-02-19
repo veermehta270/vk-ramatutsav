@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Final Submissions - Ramat Utsav{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 20px;
+    }
+    
+    .page-header h1 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+    }
+    
+    .submissions-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    
+    .submissions-table th {
+        background: #007bff;
+        color: white;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+    }
+    
+    .submissions-table td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .submissions-table tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 4px;
+        font-size: 0.9em;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .status-submitted {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-draft {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .btn-small {
+        padding: 6px 12px;
+        font-size: 0.85em;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+    
+    .empty-state-icon {
+        font-size: 4em;
+        margin-bottom: 20px;
+    }
+    
+    @media (max-width: 768px) {
+        .submissions-table {
+            font-size: 0.85em;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📋 Final Submissions</h1>
+    <p style="color: #666; font-size: 0.9em;">View and manage submitted registrations</p>
+</div>
+
+{% if combinations %}
+    <table class="submissions-table">
+        <thead>
+            <tr>
+                <th>Sanskarvarg</th>
+                <th>Group</th>
+                <th style="text-align: center;">Students</th>
+                <th style="text-align: center;">Status</th>
+                <th style="text-align: center;">Submitted At</th>
+                <th style="text-align: center;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for combo in combinations %}
+            <tr>
+                <td><strong>{{ combo.sanskarvarg.name }}</strong></td>
+                <td>
+                    <span style="background: #e3f2fd; padding: 4px 10px; border-radius: 4px; font-weight: 600;">
+                        Group {{ combo.group.name }}
+                    </span>
+                </td>
+                <td style="text-align: center;">
+                    <strong>{{ combo.student_count }}</strong>
+                </td>
+                <td style="text-align: center;">
+                    {% if combo.submission and combo.submission.is_submitted %}
+                        <span class="status-badge status-submitted">🔒 Submitted</span>
+                    {% else %}
+                        <span class="status-badge status-draft">📝 Draft</span>
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">
+                    {% if combo.submission and combo.submission.submitted_at %}
+                        {{ combo.submission.submitted_at.strftime('%d %b %Y, %I:%M %p') }}
+                    {% else %}
+                        <span style="color: #999;">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="/submissions/view/{{ combo.sanskarvarg.id }}/{{ combo.group.id }}" class="btn btn-small">
+                            👁️ View
+                        </a>
+                        
+                        {% if combo.submission and combo.submission.is_submitted %}
+                        <form method="POST" action="/submissions/unlock/{{ combo.submission.id }}" style="margin: 0;"
+                              onsubmit="return confirm('Unlock this submission for editing?')">
+                            <button type="submit" class="btn btn-secondary btn-small">
+                                🔓 Unlock
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📋</div>
+        <h2>No Submissions Yet</h2>
+        <p>Register students first to see submissions here</p>
+        <a href="/students/register" class="btn" style="margin-top: 20px;">
+            + Register Students
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

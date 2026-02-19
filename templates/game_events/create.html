@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Create Game Event - Ramat Utsav{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .form-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .form-header h1 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+    }
+    
+    .form-group select,
+    .form-group input {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #e0e0e0;
+        border-radius: 4px;
+        font-size: 1em;
+        box-sizing: border-box;
+    }
+    
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #e0e0e0;
+        border-radius: 4px;
+        font-size: 1em;
+        min-height: 80px;
+        resize: vertical;
+    }
+    
+    .form-group-inline {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    
+    .time-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    
+    .help-text {
+        font-size: 0.85em;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 4px;
+        font-size: 1em;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+        flex: 1;
+    }
+    
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        flex: 1;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+    
+    @media (max-width: 480px) {
+        .form-container {
+            padding: 15px;
+        }
+        
+        .form-group-inline,
+        .time-group {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>Schedule Game Event</h1>
+        <div class="subtitle" style="color: #666; font-size: 0.9em;">Create a new game event</div>
+    </div>
+    
+    <form method="POST" id="eventForm">
+        <div class="form-group">
+            <label for="game_id">Game *</label>
+            <select id="game_id" name="game_id" required>
+                <option value="">-- Select Game --</option>
+                {% for game in games %}
+                <option value="{{ game.id }}">{{ game.name }} ({{ game.game_type }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="group_id">Group *</label>
+            <select id="group_id" name="group_id" required>
+                <option value="">-- Select Group --</option>
+                {% for group in groups %}
+                <option value="{{ group.id }}">Group {{ group.name }} (Std {{ group.standard_from }}-{{ group.standard_to }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="gender_restriction">Gender Restriction *</label>
+            <select id="gender_restriction" name="gender_restriction" required>
+                <option value="Mixed">⚥ Mixed (Both Genders)</option>
+                <option value="Male">♂️ Male Only</option>
+                <option value="Female">♀️ Female Only</option>
+            </select>
+            <div class="help-text">Only students of the selected gender can register for this event</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="location_id">Location *</label>
+            <select id="location_id" name="location_id" required>
+                <option value="">-- Select Location --</option>
+                {% for location in locations %}
+                <option value="{{ location.id }}">{{ location.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="scheduled_date">Date *</label>
+            <input type="date" id="scheduled_date" name="scheduled_date" required>
+        </div>
+        
+        <div class="time-group">
+            <div class="form-group">
+                <label for="scheduled_time">Start Time *</label>
+                <input type="time" id="scheduled_time" name="scheduled_time" required>
+            </div>
+            <div class="form-group">
+                <label for="end_time">End Time *</label>
+                <input type="time" id="end_time" name="end_time" required>
+            </div>
+        </div>
+        <div class="help-text" style="margin-top: -10px; margin-bottom: 20px;">
+            System will check for location and group conflicts during this time range
+        </div>
+        
+        <div class="form-group">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" placeholder="Optional notes about this event"></textarea>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">📅 Schedule Event</button>
+            <a href="{{ url_for('list_game_events') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('eventForm').addEventListener('submit', function(e) {
+        const startTime = document.getElementById('scheduled_time').value;
+        const endTime = document.getElementById('end_time').value;
+        
+        if (startTime && endTime && endTime <= startTime) {
+            e.preventDefault();
+            alert('End time must be after start time!');
+            return false;
+        }
+    });
+</script>
+{% endblock %}

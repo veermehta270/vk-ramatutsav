@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+
+{% block title %}Create Game - Ramat Utsav{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 20px;
+    }
+    
+    .page-header h1 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+    }
+    
+    .page-subtitle {
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #333;
+        font-size: 0.95em;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        font-size: 1em;
+        font-family: inherit;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+    
+    .form-group textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+    
+    .team-size-row {
+        display: none;
+        gap: 12px;
+    }
+    
+    .team-size-row.active {
+        display: flex;
+    }
+    
+    .team-size-row .form-group {
+        flex: 1;
+        margin-bottom: 0;
+    }
+    
+    .capacity-section {
+        display: none;
+    }
+    
+    .capacity-section.active {
+        display: block;
+    }
+    
+    .baudhik-capacity-options {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .baudhik-capacity-options label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: normal;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 2px solid #e0e0e0;
+    }
+    
+    .form-actions .btn {
+        flex: 1;
+    }
+    
+    .help-text {
+        font-size: 0.85em;
+        color: #666;
+        margin-top: 4px;
+    }
+    
+    .required {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Create New Game</h1>
+    <p class="page-subtitle">Add a new sport, event, or baudhik competition</p>
+</div>
+
+<form method="POST" id="gameForm">
+    <div class="form-group">
+        <label for="name">Game Name <span class="required">*</span></label>
+        <input type="text" id="name" name="name" required placeholder="e.g., Kho-Kho, 100m Race">
+    </div>
+    
+    <div class="form-group">
+        <label for="game_type">Game Type <span class="required">*</span></label>
+        <select id="game_type" name="game_type" required>
+            <option value="">-- Select Type --</option>
+            <option value="Team">Team (Multiple players)</option>
+            <option value="Individual">Individual (Single player)</option>
+            <option value="Baudhik">Baudhik (Mental/Knowledge)</option>
+        </select>
+    </div>
+    
+    <!-- Team Size Section (only for Team games) -->
+    <div id="teamSizeRow" class="team-size-row">
+        <div class="form-group">
+            <label for="min_team_size">Min Players <span class="required">*</span></label>
+            <input type="number" id="min_team_size" name="min_team_size" min="1" placeholder="9">
+        </div>
+        
+        <div class="form-group">
+            <label for="max_team_size">Max Players <span class="required">*</span></label>
+            <input type="number" id="max_team_size" name="max_team_size" min="1" placeholder="12">
+        </div>
+    </div>
+    
+    <!-- Capacity Section (only for Individual games) -->
+    <div id="individualCapacitySection" class="capacity-section">
+        <div class="form-group">
+            <label for="individual_capacity">Capacity per Round <span class="required">*</span></label>
+            <input type="number" id="individual_capacity" name="capacity_per_round" min="1" placeholder="e.g., 8 (number of lanes)">
+            <div class="help-text">Enter number of lanes/positions available per round</div>
+        </div>
+    </div>
+    
+    <!-- Capacity Section (only for Baudhik games) -->
+    <div id="baudhikCapacitySection" class="capacity-section">
+        <div class="form-group">
+            <label>Capacity per Round <span class="required">*</span></label>
+            <div class="baudhik-capacity-options">
+                <label>
+                    <input type="radio" name="baudhik_capacity_type" value="all" checked>
+                    All (Single round for all students)
+                </label>
+                <label>
+                    <input type="radio" name="baudhik_capacity_type" value="limited">
+                    Limited capacity
+                </label>
+            </div>
+            
+            <input type="number" id="baudhik_capacity" name="baudhik_capacity_value" min="1" placeholder="e.g., 10" disabled>
+            <div class="help-text">Select "All" for single round, or enter capacity for multiple rounds</div>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" placeholder="Brief description (optional)"></textarea>
+    </div>
+    
+    <div class="form-actions">
+        <button type="submit" class="btn">Create Game</button>
+        <a href="/games" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+
+<script>
+    const gameTypeSelect = document.getElementById('game_type');
+    const teamSizeRow = document.getElementById('teamSizeRow');
+    const individualCapacitySection = document.getElementById('individualCapacitySection');
+    const baudhikCapacitySection = document.getElementById('baudhikCapacitySection');
+    
+    const minTeamSize = document.getElementById('min_team_size');
+    const maxTeamSize = document.getElementById('max_team_size');
+    const individualCapacity = document.getElementById('individual_capacity');
+    const baudhikCapacity = document.getElementById('baudhik_capacity');
+    const baudhikCapacityRadios = document.querySelectorAll('input[name="baudhik_capacity_type"]');
+    
+    // Game type selection
+    gameTypeSelect.addEventListener('change', function() {
+        // Hide all sections first
+        teamSizeRow.classList.remove('active');
+        individualCapacitySection.classList.remove('active');
+        baudhikCapacitySection.classList.remove('active');
+        
+        // Reset required fields
+        minTeamSize.required = false;
+        maxTeamSize.required = false;
+        individualCapacity.required = false;
+        
+        // Clear values
+        minTeamSize.value = '';
+        maxTeamSize.value = '';
+        individualCapacity.value = '';
+        baudhikCapacity.value = '';
+        
+        // Show appropriate section
+        if (this.value === 'Team') {
+            teamSizeRow.classList.add('active');
+            minTeamSize.required = true;
+            maxTeamSize.required = true;
+        } else if (this.value === 'Individual') {
+            individualCapacitySection.classList.add('active');
+            individualCapacity.required = true;
+        } else if (this.value === 'Baudhik') {
+            baudhikCapacitySection.classList.add('active');
+            document.querySelector('input[name="baudhik_capacity_type"][value="all"]').checked = true;
+            baudhikCapacity.disabled = true;
+        }
+    });
+    
+    // Baudhik capacity type selection
+    baudhikCapacityRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'all') {
+                baudhikCapacity.disabled = true;
+                baudhikCapacity.value = '';
+                baudhikCapacity.required = false;
+            } else {
+                baudhikCapacity.disabled = false;
+                baudhikCapacity.required = true;
+            }
+        });
+    });
+    
+    // Form validation
+    document.getElementById('gameForm').addEventListener('submit', function(e) {
+        const gameType = gameTypeSelect.value;
+        
+        if (gameType === 'Team') {
+            const min = parseInt(minTeamSize.value);
+            const max = parseInt(maxTeamSize.value);
+            
+            if (min > max) {
+                e.preventDefault();
+                alert('Minimum team size cannot be greater than maximum team size!');
+                return false;
+            }
+        } else if (gameType === 'Individual') {
+            if (!individualCapacity.value) {
+                e.preventDefault();
+                alert('Please enter capacity per round for Individual games!');
+                return false;
+            }
+        } else if (gameType === 'Baudhik') {
+            const capacityType = document.querySelector('input[name="baudhik_capacity_type"]:checked').value;
+            if (capacityType === 'limited' && !baudhikCapacity.value) {
+                e.preventDefault();
+                alert('Please enter capacity per round for Baudhik games!');
+                return false;
+            }
+        }
+    });
+</script>
+{% endblock %}

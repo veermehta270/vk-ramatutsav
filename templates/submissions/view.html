@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block title %}View Submission - {{ sanskarvarg.name }} - Group {{ group.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .page-header h1 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+    }
+    
+    .submission-info {
+        background: {% if is_submitted %}#d4edda{% else %}#fff3cd{% endif %};
+        border: 2px solid {% if is_submitted %}#c3e6cb{% else %}#ffc107{% endif %};
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+    }
+    
+    .submission-info .status {
+        font-size: 1.1em;
+        font-weight: 600;
+        color: {% if is_submitted %}#155724{% else %}#856404{% endif %};
+        margin-bottom: 10px;
+    }
+    
+    .submission-info .details {
+        font-size: 0.95em;
+        color: {% if is_submitted %}#155724{% else %}#856404{% endif %};
+    }
+    
+    .action-bar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+        margin-top: 20px;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9em;
+        min-width: 800px;
+    }
+    
+    th {
+        background: #007bff;
+        color: white;
+        padding: 10px 8px;
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #0056b3;
+    }
+    
+    th.game-type-header {
+        background: #0056b3;
+        font-size: 0.85em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    th.game-type-individual {
+        background: #17a2b8;
+    }
+    
+    th.game-type-team {
+        background: #ffc107;
+        color: #333;
+    }
+    
+    th.game-type-baudhik {
+        background: #28a745;
+    }
+    
+    td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        background: white;
+    }
+    
+    tbody tr:nth-child(even) {
+        background: #f8f9fa;
+    }
+    
+    tbody tr:hover {
+        background: #e9ecef;
+    }
+    
+    .row-number {
+        text-align: center;
+        font-weight: 600;
+        color: #666;
+    }
+    
+    .game-cell {
+        text-align: center;
+        min-width: 60px;
+    }
+    
+    .team-cell {
+        min-width: 150px;
+        font-size: 0.85em;
+        color: #666;
+    }
+    
+    .checkmark {
+        color: #28a745;
+        font-size: 1.2em;
+    }
+    
+    .empty-cell {
+        color: #ccc;
+    }
+    
+    .locked-notice {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    @media (max-width: 768px) {
+        table {
+            font-size: 0.85em;
+        }
+        
+        th, td {
+            padding: 6px 4px;
+        }
+        
+        .action-bar {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ sanskarvarg.name }} - Group {{ group.name }}</h1>
+    <p style="color: #666; font-size: 0.9em;">Student Registration Details</p>
+</div>
+
+<div class="submission-info">
+    <div class="status">
+        {% if is_submitted %}
+            🔒 Status: SUBMITTED (Locked)
+        {% else %}
+            📝 Status: DRAFT (Not Submitted)
+        {% endif %}
+    </div>
+    <div class="details">
+        <strong>Total Students:</strong> {{ students|length }}
+        {% if submission and submission.submitted_at %}
+        | <strong>Submitted On:</strong> {{ submission.submitted_at.strftime('%d/%m/%Y %H:%M') }}
+        {% endif %}
+    </div>
+</div>
+
+{% if is_submitted %}
+<div class="locked-notice">
+    <span>🔒</span>
+    <span>This submission is locked. Click "Unlock for Editing" to make changes.</span>
+</div>
+{% endif %}
+
+<div class="action-bar">
+    <a href="{{ url_for('list_submissions') }}" class="btn btn-secondary">← Back to Submissions</a>
+    
+    {% if is_submitted %}
+    <form method="POST" action="{{ url_for('unlock_submission', submission_id=submission.id) }}" style="display: inline;">
+        <button type="submit" class="btn" onclick="return confirm('Are you sure you want to unlock this submission for editing?')">
+            🔓 Unlock for Editing
+        </button>
+    </form>
+
+    {% endif %}
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th rowspan="2" style="width: 40px;">#</th>
+                <th rowspan="2" style="min-width: 150px;">Name</th>
+                <th rowspan="2" style="width: 80px;">Gender</th>
+                <th rowspan="2" style="width: 80px;">Std</th>
+                <th rowspan="2" style="width: 120px;">DOB</th>
+                
+                <!-- Individual Games -->
+                {% if games_by_type.Individual %}
+                <th colspan="{{ games_by_type.Individual|length }}" class="game-type-header game-type-individual">
+                    🏃 INDIVIDUAL GAMES
+                </th>
+                {% endif %}
+                
+                <!-- Team Games -->
+                {% if games_by_type.Team %}
+                <th colspan="{{ games_by_type.Team|length * 2 }}" class="game-type-header game-type-team">
+                    👥 TEAM GAMES
+                </th>
+                {% endif %}
+                
+                <!-- Baudhik Games -->
+                {% if games_by_type.Baudhik %}
+                <th colspan="{{ games_by_type.Baudhik|length }}" class="game-type-header game-type-baudhik">
+                    🧠 BAUDHIK
+                </th>
+                {% endif %}
+            </tr>
+            <tr>
+                <!-- Individual Game Names -->
+                {% for game in games_by_type.Individual %}
+                <th class="game-type-individual">{{ game.name }}</th>
+                {% endfor %}
+                
+                <!-- Team Game Names -->
+                {% for game in games_by_type.Team %}
+                <th class="game-type-team">{{ game.name }}</th>
+                <th class="game-type-team">Team</th>
+                {% endfor %}
+                
+                <!-- Baudhik Game Names -->
+                {% for game in games_by_type.Baudhik %}
+                <th class="game-type-baudhik">{{ game.name }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td class="row-number">{{ loop.index }}</td>
+                <td><strong>{{ student.name }}</strong></td>
+                <td style="text-align: center;">{{ student.gender }}</td>
+                <td style="text-align: center;">{{ student.standard }}</td>
+                <td style="text-align: center;">{{ student.date_of_birth.strftime('%d/%m/%Y') }}</td>
+                
+                <!-- Individual Games -->
+                {% for game in games_by_type.Individual %}
+                <td class="game-cell">
+                    {% if student.participations.get(game.id) %}
+                    <span class="checkmark">✓</span>
+                    {% else %}
+                    <span class="empty-cell">-</span>
+                    {% endif %}
+                </td>
+                {% endfor %}
+                
+                <!-- Team Games -->
+                {% for game in games_by_type.Team %}
+                <td class="game-cell">
+                    {% if student.participations.get(game.id) %}
+                    <span class="checkmark">✓</span>
+                    {% else %}
+                    <span class="empty-cell">-</span>
+                    {% endif %}
+                </td>
+                <td class="team-cell">
+                    {% if student.participations.get(game.id) %}
+                    {{ student.participations.get(game.id).team_name or '-' }}
+                    {% else %}
+                    <span class="empty-cell">-</span>
+                    {% endif %}
+                </td>
+                {% endfor %}
+                
+                <!-- Baudhik Games -->
+                {% for game in games_by_type.Baudhik %}
+                <td class="game-cell">
+                    {% if student.participations.get(game.id) %}
+                    <span class="checkmark">✓</span>
+                    {% else %}
+                    <span class="empty-cell">-</span>
+                    {% endif %}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if not students %}
+<div style="text-align: center; padding: 40px; color: #999;">
+    <p>No students registered yet.</p>
+</div>
+{% endif %}
+
+{% endblock %}

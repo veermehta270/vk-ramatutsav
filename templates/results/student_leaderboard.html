@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Student Leaderboard - Ramat Utsav{% endblock %}
+
+{% block extra_css %}
+<style>
+    .leaderboard-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+    
+    .leaderboard-header h1 {
+        margin: 0 0 5px 0;
+        font-size: 2em;
+    }
+    
+    .leaderboard-header .subtitle {
+        opacity: 0.9;
+        font-size: 1em;
+    }
+    
+    .actions-bar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        justify-content: flex-end;
+    }
+    
+    .leaderboard-table {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    th {
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85em;
+        letter-spacing: 0.5px;
+    }
+    
+    td {
+        padding: 15px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    tbody tr:hover {
+        background: #f9f9f9;
+    }
+    
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .rank-cell {
+        font-weight: 700;
+        font-size: 1.2em;
+        width: 80px;
+        text-align: center;
+    }
+    
+    .rank-1 {
+        color: #ffd700;
+        font-size: 1.5em;
+    }
+    
+    .rank-2 {
+        color: #c0c0c0;
+        font-size: 1.4em;
+    }
+    
+    .rank-3 {
+        color: #cd7f32;
+        font-size: 1.3em;
+    }
+    
+    .student-id {
+        font-family: 'Courier New', monospace;
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .sanskarvarg-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        background: #e3f2fd;
+        color: #1976d2;
+        border-radius: 4px;
+        font-size: 0.85em;
+        font-weight: 600;
+    }
+    
+    .points-cell {
+        font-weight: 700;
+        font-size: 1.3em;
+        color: #28a745;
+        text-align: center;
+        width: 120px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+    
+    .empty-state-icon {
+        font-size: 4em;
+        margin-bottom: 20px;
+    }
+    
+    @media print {
+        .actions-bar {
+            display: none;
+        }
+        
+        .leaderboard-table {
+            box-shadow: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="leaderboard-header">
+    <h1>🏆 Student Leaderboard</h1>
+    <div class="subtitle">Top Performers - Ramat Utsav 2025</div>
+</div>
+
+<div class="actions-bar">
+    <a href="/results/event-wise" class="btn btn-secondary">📋 View Event-wise Results</a>
+    <a href="/results/export-combined-pdf" class="btn btn-primary" target="_blank">📄 Export PDF</a>
+</div>
+
+{% if students_points %}
+    <div class="leaderboard-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Student ID</th>
+                    <th>Sanskarvarg</th>
+                    <th>Student Name</th>
+                    <th style="text-align: center;">Total Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in students_points %}
+                <tr>
+                    <td class="rank-cell {% if item.rank <= 3 %}rank-{{ item.rank }}{% endif %}">
+                        {% if item.rank == 1 %}
+                            🥇
+                        {% elif item.rank == 2 %}
+                            🥈
+                        {% elif item.rank == 3 %}
+                            🥉
+                        {% else %}
+                            {{ item.rank }}
+                        {% endif %}
+                    </td>
+                    <td class="student-id">{{ item.student.student_id }}</td>
+                    <td>
+                        <span class="sanskarvarg-badge">{{ item.student.sanskarvarg.name }}</span>
+                    </td>
+                    <td>{{ item.student.name }}</td>
+                    <td class="points-cell">{{ item.total_points }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📊</div>
+        <h2>No Results Yet</h2>
+        <p>No results have been recorded yet. Record event results to see the leaderboard.</p>
+        <a href="/game-events" class="btn" style="margin-top: 20px;">Go to Events</a>
+    </div>
+{% endif %}
+{% endblock %}

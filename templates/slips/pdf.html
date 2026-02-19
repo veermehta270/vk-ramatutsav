@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Schedule Slips - {{ sanskarvarg.name }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: white;
+        }
+        
+        .page {
+            width: 210mm;
+            height: 297mm;
+            page-break-after: always;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            padding: 0;
+        }
+        
+        .page:last-child {
+            page-break-after: auto;
+        }
+        
+        .slip {
+            width: 105mm;
+            height: 99mm;
+            border: 1px solid #000;
+            border-right: 1px dashed #999;
+            border-bottom: 1px dashed #999;
+            padding: 8mm;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Remove right dashed border for rightmost column */
+        .slip:nth-child(even) {
+            border-right: 1px solid #000;
+        }
+        
+        /* Remove bottom dashed border for bottom row */
+        .slip:nth-child(5),
+        .slip:nth-child(6) {
+            border-bottom: 1px solid #000;
+        }
+        
+        .slip-header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 3mm;
+            margin-bottom: 3mm;
+        }
+        
+        .event-title {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 1mm;
+            letter-spacing: 1px;
+        }
+        
+        .event-year {
+            font-size: 10pt;
+            color: #333;
+        }
+        
+        .student-info {
+            font-size: 9pt;
+            line-height: 1.4;
+            margin-bottom: 3mm;
+        }
+        
+        .student-info-row {
+            margin: 1mm 0;
+        }
+        
+        .label {
+            font-weight: bold;
+            display: inline-block;
+            width: 22mm;
+        }
+        
+        .schedule-section {
+            border-top: 1px solid #000;
+            padding-top: 2mm;
+            margin-top: 2mm;
+        }
+        
+        .schedule-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 10pt;
+            margin-bottom: 2mm;
+            text-transform: uppercase;
+        }
+        
+        .schedule-date {
+            text-align: center;
+            font-size: 9pt;
+            margin-bottom: 2mm;
+            font-weight: bold;
+        }
+        
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8pt;
+        }
+        
+        .schedule-table th {
+            background: #f0f0f0;
+            padding: 1.5mm;
+            text-align: left;
+            border: 1px solid #999;
+            font-weight: bold;
+            font-size: 8pt;
+        }
+        
+        .schedule-table td {
+            padding: 1.5mm;
+            border: 1px solid #ccc;
+            vertical-align: top;
+            line-height: 1.3;
+        }
+        
+        .time-col {
+            width: 22mm;
+            white-space: nowrap;
+        }
+        
+        .event-col {
+            width: auto;
+        }
+        
+        .venue-col {
+            width: 22mm;
+        }
+        
+        .no-events {
+            text-align: center;
+            padding: 5mm;
+            font-size: 9pt;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .print-button:hover {
+            background: #0056b3;
+        }
+        
+        @media print {
+            .print-button {
+                display: none;
+            }
+            
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            
+            .page {
+                margin: 0;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    
+    {% set ns = namespace(count=0) %}
+    
+    {% for slip in slips_data %}
+        {% if ns.count % 6 == 0 %}
+            {% if ns.count > 0 %}</div>{% endif %}
+            <div class="page">
+        {% endif %}
+        
+        <div class="slip">
+            <div class="slip-header">
+                <div class="event-title">RAMAT UTSAV - 2025</div>
+            </div>
+            
+            <div class="student-info">
+                <div class="student-info-row">
+                    <span class="label">Name:</span> {{ slip.student.name }}
+                </div>
+                <div class="student-info-row">
+                    <span class="label">Code:</span> {{ slip.student.student_id }}
+                </div>
+                <div class="student-info-row">
+                    <span class="label">Sanskarvarg:</span> {{ slip.student.sanskarvarg.name }}
+                </div>
+                <div class="student-info-row">
+                    <span class="label">Group:</span> {{ slip.student.group.name }} (Std {{ slip.student.standard }})
+                </div>
+            </div>
+            
+            <div class="schedule-section">
+                <div class="schedule-title">Your Schedule</div>
+                
+                {% if slip.schedule %}
+                    {% set first_date = slip.schedule[0].date %}
+                    <div class="schedule-date">{{ first_date.strftime('%d %B %Y') }}</div>
+                    
+                    <table class="schedule-table">
+                        <thead>
+                            <tr>
+                                <th class="time-col">Time</th>
+                                <th class="event-col">Event</th>
+                                <th class="venue-col">Venue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in slip.schedule %}
+                            <tr>
+                                <td class="time-col">{{ entry.start_time.strftime('%H:%M') }}-{{ entry.end_time.strftime('%H:%M') }}</td>
+                                <td class="event-col">{{ entry.event_name }}</td>
+                                <td class="venue-col">{{ entry.location }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="no-events">
+                        No events scheduled yet.<br>
+                        Please check with your coordinator.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% set ns.count = ns.count + 1 %}
+    {% endfor %}
+    
+    {% if ns.count > 0 %}
+        </div> <!-- Close last page -->
+    {% endif %}
+    
+    {% if slips_data|length == 0 %}
+    <div style="text-align: center; padding: 100px 20px; font-family: Arial;">
+        <h1 style="color: #999;">No Submitted Registrations</h1>
+        <p style="color: #666;">No students with submitted registrations found for {{ sanskarvarg.name }}</p>
+    </div>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - Ramat Utsav{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 20px;
+    }
+    
+    .page-header h1 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+    }
+    
+    .users-table {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    thead {
+        background: #667eea;
+        color: white;
+    }
+    
+    th {
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85em;
+    }
+    
+    td {
+        padding: 15px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    tbody tr:hover {
+        background: #f9f9f9;
+    }
+    
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .role-badge {
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .role-utsavpramukh {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .role-sanchalan {
+        background: #007bff;
+        color: white;
+    }
+    
+    .role-vargshikshak {
+        background: #28a745;
+        color: white;
+    }
+    
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        font-weight: 600;
+    }
+    
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .sanskarvarg-list {
+        font-size: 0.9em;
+        color: #666;
+    }
+    
+    .sanskarvarg-item {
+        display: inline-block;
+        padding: 2px 8px;
+        background: #e3f2fd;
+        border-radius: 3px;
+        margin-right: 5px;
+        margin-bottom: 3px;
+    }
+    
+    .actions {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .btn-small {
+        padding: 6px 12px;
+        font-size: 0.85em;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-toggle {
+        background: #ffc107;
+        color: #333;
+    }
+    
+    .btn-toggle:hover {
+        background: #e0a800;
+    }
+    
+    .btn-delete {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .btn-delete:hover {
+        background: #c82333;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+    
+    .empty-state-icon {
+        font-size: 4em;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>User Management</h1>
+    <a href="/users/create" class="btn">+ Add New User</a>
+</div>
+
+{% if user_data %}
+    <div class="users-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Role</th>
+                    <th>Assigned Sanskarvargs</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in user_data %}
+                <tr>
+                    <td><strong>{{ item.user.username }}</strong></td>
+                    <td>{{ item.user.full_name }}</td>
+                    <td>
+                        <span class="role-badge role-{{ item.user.role.lower() }}">
+                            {% if item.user.role == 'UtsavPramukh' %}
+                                👑 UtsavPramukh
+                            {% elif item.user.role == 'Sanchalan' %}
+                                📋 Sanchalan
+                            {% else %}
+                                👨‍🏫 Vargshikshak
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        {% if item.assigned_sanskarvargs %}
+                            <div class="sanskarvarg-list">
+                                {% for sv in item.assigned_sanskarvargs %}
+                                    <span class="sanskarvarg-item">{{ sv }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <span style="color: #999;">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="status-badge status-{{ 'active' if item.user.is_active else 'inactive' }}">
+                            {{ 'Active' if item.user.is_active else 'Inactive' }}
+                        </span>
+                    </td>
+                    <td>{{ item.user.created_at.strftime('%d %b %Y') }}</td>
+                    <td>
+                        <div class="actions">
+                            <form method="POST" action="/users/toggle-status/{{ item.user.id }}" style="display: inline;">
+                                <button type="submit" class="btn-small btn-toggle">
+                                    {{ '❌ Deactivate' if item.user.is_active else '✅ Activate' }}
+                                </button>
+                            </form>
+                            <form method="POST" action="/users/delete/{{ item.user.id }}" style="display: inline;" 
+                                  onsubmit="return confirm('Delete user {{ item.user.username }}? This action cannot be undone.')">
+                                <button type="submit" class="btn-small btn-delete">🗑️ Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">👥</div>
+        <h2>No Users</h2>
+        <p>Create your first user to get started</p>
+        <a href="/users/create" class="btn" style="margin-top: 20px;">+ Add First User</a>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Add New User - Ramat Utsav{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .form-header {
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .form-header h1 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+    }
+    
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #e0e0e0;
+        border-radius: 4px;
+        font-size: 1em;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    
+    .required {
+        color: #dc3545;
+    }
+    
+    .help-text {
+        font-size: 0.85em;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    .checkbox-group {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 2px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 15px;
+        background: #f9f9f9;
+    }
+    
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        margin-bottom: 8px;
+        background: white;
+        border-radius: 4px;
+        border: 1px solid #e0e0e0;
+    }
+    
+    .checkbox-item input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        cursor: pointer;
+    }
+    
+    .checkbox-item label {
+        margin: 0;
+        cursor: pointer;
+        flex: 1;
+    }
+    
+    #sanskarvargSection {
+        display: none;
+    }
+    
+    #sanskarvargSection.active {
+        display: block;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .form-actions .btn {
+        flex: 1;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>Add New User</h1>
+        <div class="subtitle" style="color: #666; font-size: 0.9em;">Create a new user account</div>
+    </div>
+    
+    <form method="POST" id="userForm">
+        <div class="form-group">
+            <label for="username">Username <span class="required">*</span></label>
+            <input type="text" 
+                   id="username" 
+                   name="username" 
+                   placeholder="e.g., john.doe" 
+                   required 
+                   pattern="[a-zA-Z0-9._-]+"
+                   minlength="3">
+            <div class="help-text">Only letters, numbers, dots, dashes, and underscores allowed</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password <span class="required">*</span></label>
+            <input type="password" 
+                   id="password" 
+                   name="password" 
+                   placeholder="Enter secure password" 
+                   required
+                   minlength="6">
+            <div class="help-text">Minimum 6 characters</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="full_name">Full Name <span class="required">*</span></label>
+            <input type="text" 
+                   id="full_name" 
+                   name="full_name" 
+                   placeholder="e.g., John Doe" 
+                   required>
+        </div>
+        
+        <div class="form-group">
+            <label for="role">Role <span class="required">*</span></label>
+            <select id="role" name="role" required onchange="toggleSanskarvargSection()">
+                <option value="">-- Select Role --</option>
+                <option value="UtsavPramukh">👑 UtsavPramukh (Super Admin)</option>
+                <option value="Sanchalan">📋 Sanchalan (Management)</option>
+                <option value="Vargshikshak">👨‍🏫 Vargshikshak (Teacher)</option>
+            </select>
+            <div class="help-text">
+                <strong>UtsavPramukh:</strong> Full access + user management<br>
+                <strong>Sanchalan:</strong> Setup & configuration (no student registration/results)<br>
+                <strong>Vargshikshak:</strong> Only student registration for assigned sanskarvargs
+            </div>
+        </div>
+        
+        <div id="sanskarvargSection" class="form-group">
+            <label>Assign Sanskarvargs <span class="required">*</span></label>
+            <div class="checkbox-group">
+                {% if sanskarvargs %}
+                    {% for sv in sanskarvargs %}
+                    <div class="checkbox-item">
+                        <input type="checkbox" 
+                               id="sv_{{ sv.id }}" 
+                               name="sanskarvarg_ids" 
+                               value="{{ sv.id }}">
+                        <label for="sv_{{ sv.id }}">{{ sv.name }}</label>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: #999; padding: 10px;">No sanskarvargs available. Create sanskarvargs first.</p>
+                {% endif %}
+            </div>
+            <div class="help-text">Select one or more sanskarvargs this Vargshikshak can manage</div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn">✅ Create User</button>
+            <a href="/users" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    function toggleSanskarvargSection() {
+        const role = document.getElementById('role').value;
+        const section = document.getElementById('sanskarvargSection');
+        
+        if (role === 'Vargshikshak') {
+            section.classList.add('active');
+            // Make checkboxes required
+            document.querySelectorAll('input[name="sanskarvarg_ids"]').forEach(cb => {
+                cb.required = false; // Will validate with custom logic
+            });
+        } else {
+            section.classList.remove('active');
+            // Clear selections
+            document.querySelectorAll('input[name="sanskarvarg_ids"]').forEach(cb => {
+                cb.checked = false;
+                cb.required = false;
+            });
+        }
+    }
+    
+    document.getElementById('userForm').addEventListener('submit', function(e) {
+        const role = document.getElementById('role').value;
+        
+        if (role === 'Vargshikshak') {
+            const checkedBoxes = document.querySelectorAll('input[name="sanskarvarg_ids"]:checked');
+            if (checkedBoxes.length === 0) {
+                e.preventDefault();
+                alert('Please assign at least one Sanskarvarg to the Vargshikshak');
+                return false;
+            }
+        }
+    });
+</script>
+{% endblock %}

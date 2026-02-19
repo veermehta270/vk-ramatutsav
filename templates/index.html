@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Ramat Utsav{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-title {
+        font-size: 1.5em;
+        margin-bottom: 20px;
+        color: #333;
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .card {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        text-decoration: none;
+        color: #333;
+        display: block;
+    }
+    
+    .card:active {
+        background: #f8f9fa;
+        border-color: #007bff;
+    }
+    
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+    
+    .card-icon {
+        font-size: 2em;
+    }
+    
+    .card-title {
+        font-size: 1.3em;
+        font-weight: 600;
+    }
+    
+    .card-description {
+        color: #666;
+        font-size: 0.95em;
+        line-height: 1.5;
+    }
+    
+    .card-status {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #e0e0e0;
+        font-size: 0.85em;
+        color: #888;
+    }
+    
+    /* Tablet and larger */
+    @media (min-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    /* Desktop */
+    @media (min-width: 1024px) {
+        .dashboard-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Dashboard</h1>
+
+<div class="dashboard-grid">
+    <a href="/games" class="card">
+        <div class="card-header">
+            <div class="card-icon">🎮</div>
+            <div class="card-title">Games</div>
+        </div>
+        <div class="card-description">
+            Create and manage sports, individual events, and baudhik competitions
+        </div>
+        <div class="card-status">Active</div>
+    </a>
+    
+    <a href="/groups" class="card">
+        <div class="card-header">
+            <div class="card-icon">👥</div>
+            <div class="card-title">Groups</div>
+        </div>
+        <div class="card-description">
+            Define age groups (A, B, C) based on standard ranges
+        </div>
+        <div class="card-status">Active</div>
+    </a>
+    
+    <a href="/locations" class="card">
+        <div class="card-header">
+            <div class="card-icon">📍</div>
+            <div class="card-title">Locations</div>
+        </div>
+        <div class="card-description">
+            Add and manage venues and grounds for events
+        </div>
+        <div class="card-status">Active</div>
+    </a>
+    
+    <a href="/sanskarvargs" class="card">
+        <div class="card-header">
+            <div class="card-icon">🏘️</div>
+            <div class="card-title">Sanskarvarg</div>
+        </div>
+        <div class="card-description">
+            Register organizations and their contact details
+        </div>
+        <div class="card-status">Active</div>
+    </a>
+    
+    <a href="/game-events" class="card">
+        <div class="card-header">
+            <div class="card-icon">📅</div>
+            <div class="card-title">Schedule Events</div>
+        </div>
+        <div class="card-description">
+            Schedule games for specific groups at locations
+        </div>
+        <div class="card-status">Coming soon</div>
+    </a>
+    
+    <a href="/students" class="card">
+        <div class="card-header">
+            <div class="card-icon">👨‍🎓</div>
+            <div class="card-title">Students</div>
+        </div>
+        <div class="card-description">
+            Register students from each sanskarvarg
+        </div>
+        <div class="card-status">Coming soon</div>
+    </a>
+</div>
+{% endblock %}

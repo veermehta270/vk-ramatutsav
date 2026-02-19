@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Create Sanskarvarg - Ramat Utsav{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .form-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .form-header h1 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+    }
+    
+    .form-header .subtitle {
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .info-box {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 12px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        font-size: 0.9em;
+        color: #0d47a1;
+    }
+    
+    .form-section {
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .form-section:last-of-type {
+        border-bottom: none;
+    }
+    
+    .form-section-title {
+        font-size: 1.1em;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #e0e0e0;
+        border-radius: 4px;
+        font-size: 1em;
+        box-sizing: border-box;
+    }
+    
+    .form-group textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+    
+    .form-group .help-text {
+        font-size: 0.85em;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    .form-group-inline {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 4px;
+        font-size: 1em;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+        flex: 1;
+    }
+    
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        flex: 1;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+    
+    @media (max-width: 480px) {
+        .form-container {
+            padding: 15px;
+        }
+        
+        .form-group-inline {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>Create New Sanskarvarg</h1>
+        <div class="subtitle">Register a new organization</div>
+    </div>
+    
+    <div class="info-box">
+        ℹ️ A unique 3-letter abbreviation will be automatically generated from the name
+    </div>
+    
+    <form method="POST">
+        <!-- Basic Information -->
+        <div class="form-section">
+            <div class="form-section-title">Basic Information</div>
+            
+            <div class="form-group">
+                <label for="name">Sanskarvarg Name *</label>
+                <input type="text" id="name" name="name" required placeholder="e.g., Rajkot Sanskarvarg">
+            </div>
+            
+            <div class="form-group">
+                <label for="address">Address</label>
+                <textarea id="address" name="address" placeholder="Enter complete address"></textarea>
+            </div>
+        </div>
+        
+        <!-- Contact Information -->
+        <div class="form-section">
+            <div class="form-section-title">Contact Information</div>
+            
+            <div class="form-group-inline">
+                <div class="form-group">
+                    <label for="contact_person_1">Primary Contact Person</label>
+                    <input type="text" id="contact_person_1" name="contact_person_1" placeholder="Full name">
+                </div>
+                <div class="form-group">
+                    <label for="contact_phone_1">Primary Phone</label>
+                    <input type="tel" id="contact_phone_1" name="contact_phone_1" placeholder="Phone number">
+                </div>
+            </div>
+            
+            <div class="form-group-inline">
+                <div class="form-group">
+                    <label for="contact_person_2">Secondary Contact Person</label>
+                    <input type="text" id="contact_person_2" name="contact_person_2" placeholder="Full name">
+                </div>
+                <div class="form-group">
+                    <label for="contact_phone_2">Secondary Phone</label>
+                    <input type="tel" id="contact_phone_2" name="contact_phone_2" placeholder="Phone number">
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">💾 Create Sanskarvarg</button>
+            <a href="{{ url_for('list_sanskarvargs') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

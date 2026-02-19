@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ramat Utsav Results - Complete Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            padding: 20px;
+            background: white;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2em;
+            color: #666;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            page-break-inside: avoid;
+        }
+        
+        .section-title {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        /* Leaderboard Table */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        
+        .leaderboard-table thead {
+            background: #667eea;
+            color: white;
+        }
+        
+        .leaderboard-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+        
+        .leaderboard-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .leaderboard-table tbody tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        .rank-cell {
+            font-weight: 700;
+            text-align: center;
+            width: 60px;
+        }
+        
+        .rank-1 { color: #ffd700; font-size: 1.3em; }
+        .rank-2 { color: #c0c0c0; font-size: 1.2em; }
+        .rank-3 { color: #cd7f32; font-size: 1.1em; }
+        
+        .student-id {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .sanskarvarg-cell {
+            font-size: 0.9em;
+            color: #1976d2;
+            font-weight: 600;
+        }
+        
+        .points-cell {
+            font-weight: 700;
+            font-size: 1.2em;
+            color: #28a745;
+            text-align: center;
+        }
+        
+        /* Event Results */
+        .event-card {
+            margin-bottom: 25px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            page-break-inside: avoid;
+        }
+        
+        .event-header {
+            margin-bottom: 15px;
+        }
+        
+        .event-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .event-meta {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .positions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .positions-table td {
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .position-label {
+            font-weight: 600;
+            width: 120px;
+        }
+        
+        .first-pos { background: #fffef0; }
+        .second-pos { background: #f5f5f5; }
+        .third-pos { background: #fff8f0; }
+        
+        .winner-name {
+            font-weight: 500;
+        }
+        
+        .empty-position {
+            color: #999;
+            font-style: italic;
+        }
+        
+        /* Print Styles */
+        @media print {
+            body {
+                padding: 10px;
+            }
+            
+            .section {
+                page-break-after: always;
+            }
+            
+            .section:last-child {
+                page-break-after: auto;
+            }
+            
+            .event-card {
+                page-break-inside: avoid;
+            }
+        }
+        
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .print-button:hover {
+            background: #5568d3;
+        }
+        
+        @media print {
+            .print-button {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    
+    <div class="header">
+        <h1>🏆 Ramat Utsav Results</h1>
+        <div class="subtitle">Complete Report - 2025</div>
+    </div>
+    
+    <!-- Student Leaderboard Section -->
+    <div class="section">
+        <h2 class="section-title">📊 Student Leaderboard</h2>
+        
+        {% if students_points %}
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Student ID</th>
+                        <th>Sanskarvarg</th>
+                        <th>Student Name</th>
+                        <th style="text-align: center;">Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in students_points %}
+                    <tr>
+                        <td class="rank-cell {% if item.rank <= 3 %}rank-{{ item.rank }}{% endif %}">
+                            {% if item.rank == 1 %}
+                                🥇
+                            {% elif item.rank == 2 %}
+                                🥈
+                            {% elif item.rank == 3 %}
+                                🥉
+                            {% else %}
+                                {{ item.rank }}
+                            {% endif %}
+                        </td>
+                        <td class="student-id">{{ item.student.student_id }}</td>
+                        <td class="sanskarvarg-cell">{{ item.student.sanskarvarg.name }}</td>
+                        <td>{{ item.student.name }}</td>
+                        <td class="points-cell">{{ item.total_points }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="text-align: center; color: #999; padding: 40px;">No results recorded yet.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Event-wise Results Section -->
+    <div class="section">
+        <h2 class="section-title">📋 Event-wise Results</h2>
+        
+        {% if events_with_results %}
+            {% for item in events_with_results %}
+            <div class="event-card">
+                <div class="event-header">
+                    <div class="event-title">{{ item.event.game.name }}</div>
+                    <div class="event-meta">
+                        Group {{ item.event.group.name }} • 
+                        {{ item.event.location.name }} • 
+                        {{ item.event.scheduled_date.strftime('%d %B %Y') }}
+                    </div>
+                </div>
+                
+                <table class="positions-table">
+                    <tr class="first-pos">
+                        <td class="position-label">🥇 First Place (3 pts)</td>
+                        <td class="winner-name">
+                            {% if item.first %}
+                                {{ item.first.get_display_name() }}
+                            {% else %}
+                                <span class="empty-position">Not Awarded</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr class="second-pos">
+                        <td class="position-label">🥈 Second Place (2 pts)</td>
+                        <td class="winner-name">
+                            {% if item.second %}
+                                {{ item.second.get_display_name() }}
+                            {% else %}
+                                <span class="empty-position">Not Awarded</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr class="third-pos">
+                        <td class="position-label">🥉 Third Place (1 pt)</td>
+                        <td class="winner-name">
+                            {% if item.third %}
+                                {{ item.third.get_display_name() }}
+                            {% else %}
+                                <span class="empty-position">Not Awarded</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align: center; color: #999; padding: 40px;">No results recorded yet.</p>
+        {% endif %}
+    </div>
+    
+    <div style="text-align: center; color: #999; font-size: 0.9em; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+        Generated on {{ current_date }}
+    </div>
+</body>
+</html>

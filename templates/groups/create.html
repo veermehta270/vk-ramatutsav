@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Create Group - Ramat Utsav{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .form-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .form-header h1 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+    }
+    
+    .form-header .subtitle {
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #e0e0e0;
+        border-radius: 4px;
+        font-size: 1em;
+        box-sizing: border-box;
+    }
+    
+    .form-group textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+    
+    .form-group .help-text {
+        font-size: 0.85em;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    .form-group-inline {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 4px;
+        font-size: 1em;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+        flex: 1;
+    }
+    
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        flex: 1;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+    
+    @media (max-width: 480px) {
+        .form-container {
+            padding: 15px;
+        }
+        
+        .form-group-inline {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>Create New Group</h1>
+        <div class="subtitle">Define a student group based on standard range</div>
+    </div>
+    
+    <form method="POST" id="createGroupForm">
+        <div class="form-group">
+            <label for="name">Group Name *</label>
+            <input type="text" id="name" name="name" required placeholder="e.g., A, B, C, Junior, Senior">
+            <div class="help-text">Give your group a unique name</div>
+        </div>
+        
+        <div class="form-group-inline">
+            <div class="form-group">
+                <label for="standard_from">Starting Standard *</label>
+                <input type="number" id="standard_from" name="standard_from" min="1" max="12" required placeholder="1">
+            </div>
+            <div class="form-group">
+                <label for="standard_to">Ending Standard *</label>
+                <input type="number" id="standard_to" name="standard_to" min="1" max="12" required placeholder="12">
+            </div>
+        </div>
+        <div class="help-text" style="margin-top: -10px; margin-bottom: 20px;">
+            Standard range must be between 1-12 and cannot overlap with existing groups
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" placeholder="Optional description of this group"></textarea>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">💾 Create Group</button>
+            <a href="{{ url_for('list_groups') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('createGroupForm').addEventListener('submit', function(e) {
+        const standardFrom = parseInt(document.getElementById('standard_from').value);
+        const standardTo = parseInt(document.getElementById('standard_to').value);
+        
+        if (standardFrom > standardTo) {
+            e.preventDefault();
+            alert('Starting standard cannot be greater than ending standard!');
+            return false;
+        }
+        
+        if (standardFrom < 1 || standardTo > 12) {
+            e.preventDefault();
+            alert('Standard range must be between 1 and 12!');
+            return false;
+        }
+    });
+</script>
+{% endblock %}

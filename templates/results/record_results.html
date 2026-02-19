@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}Record Results - {{ game.name }} - Ramat Utsav{% endblock %}
+
+{% block extra_css %}
+<style>
+    .results-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+    }
+    
+    .results-header h1 {
+        margin: 0 0 5px 0;
+        font-size: 1.8em;
+    }
+    
+    .results-header .subtitle {
+        opacity: 0.9;
+        font-size: 0.95em;
+    }
+    
+    .results-form {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .position-group {
+        margin-bottom: 25px;
+        padding: 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        background: #f9f9f9;
+    }
+    
+    .position-group.first {
+        border-color: #ffd700;
+        background: #fffef0;
+    }
+    
+    .position-group.second {
+        border-color: #c0c0c0;
+        background: #f5f5f5;
+    }
+    
+    .position-group.third {
+        border-color: #cd7f32;
+        background: #fff8f0;
+    }
+    
+    .position-label {
+        font-size: 1.3em;
+        font-weight: 600;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .position-label .medal {
+        font-size: 1.5em;
+    }
+    
+    .position-label .points {
+        margin-left: auto;
+        font-size: 0.8em;
+        padding: 4px 10px;
+        background: white;
+        border-radius: 4px;
+        color: #666;
+    }
+    
+    .form-group {
+        margin-bottom: 0;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: #555;
+    }
+    
+    .form-select {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        font-size: 1em;
+        background: white;
+    }
+    
+    .form-select:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    
+    .actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 30px;
+    }
+    
+    .btn-save {
+        flex: 1;
+        background: #28a745;
+        color: white;
+        padding: 12px;
+        font-size: 1.1em;
+        font-weight: 600;
+    }
+    
+    .btn-save:hover {
+        background: #218838;
+    }
+    
+    .btn-cancel {
+        flex: 1;
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-cancel:hover {
+        background: #5a6268;
+    }
+    
+    .info-box {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+    }
+    
+    .info-box strong {
+        display: block;
+        margin-bottom: 5px;
+        color: #1976d2;
+    }
+    
+    .no-participants {
+        text-align: center;
+        padding: 40px;
+        color: #999;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="results-header">
+    <h1>🏆 Record Results</h1>
+    <div class="subtitle">
+        {{ game.name }} - Group {{ event.group.name }} - Gender {{event.gender_restriction}} -
+        {{ event.scheduled_date.strftime('%d %B %Y') }}
+    </div>
+</div>
+
+{% if options %}
+    <div class="info-box">
+        <strong>📋 Instructions:</strong>
+        Select the winners for each position. Positions can be left blank if not applicable.
+        Points: 1st Place = 3 points, 2nd Place = 2 points, 3rd Place = 1 point.
+        {% if is_team_game %}
+        <br><strong>Note:</strong> All team members will receive points individually.
+        {% endif %}
+    </div>
+    
+    <div class="results-form">
+        <form id="resultsForm">
+            <!-- First Position -->
+            <div class="position-group first">
+                <div class="position-label">
+                    <span class="medal">🥇</span>
+                    <span>First Position</span>
+                    <span class="points">3 Points</span>
+                </div>
+                <div class="form-group">
+                    <label for="position_1">Select Winner:</label>
+                    <select id="position_1" name="position_1" class="form-select">
+                        <option value="">-- Select {{ 'Team' if is_team_game else 'Student' }} --</option>
+                        {% for option in options %}
+                            <option value="{{ option.id }}" 
+                                {% if current_results.get(1) == option.id %}selected{% endif %}>
+                                {{ option.display }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Second Position -->
+            <div class="position-group second">
+                <div class="position-label">
+                    <span class="medal">🥈</span>
+                    <span>Second Position</span>
+                    <span class="points">2 Points</span>
+                </div>
+                <div class="form-group">
+                    <label for="position_2">Select Runner-up:</label>
+                    <select id="position_2" name="position_2" class="form-select">
+                        <option value="">-- Select {{ 'Team' if is_team_game else 'Student' }} --</option>
+                        {% for option in options %}
+                            <option value="{{ option.id }}"
+                                {% if current_results.get(2) == option.id %}selected{% endif %}>
+                                {{ option.display }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Third Position -->
+            <div class="position-group third">
+                <div class="position-label">
+                    <span class="medal">🥉</span>
+                    <span>Third Position</span>
+                    <span class="points">1 Point</span>
+                </div>
+                <div class="form-group">
+                    <label for="position_3">Select Third Place:</label>
+                    <select id="position_3" name="position_3" class="form-select">
+                        <option value="">-- Select {{ 'Team' if is_team_game else 'Student' }} --</option>
+                        {% for option in options %}
+                            <option value="{{ option.id }}"
+                                {% if current_results.get(3) == option.id %}selected{% endif %}>
+                                {{ option.display }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button type="submit" class="btn btn-save">💾 Save Results</button>
+                <a href="/game-events" class="btn btn-cancel">← Cancel</a>
+            </div>
+        </form>
+    </div>
+{% else %}
+    <div class="no-participants">
+        <h2>⚠️ No Participants</h2>
+        <p>There are no submitted registrations for this event yet.</p>
+        <a href="/game-events" class="btn">← Back to Events</a>
+    </div>
+{% endif %}
+
+<script>
+document.getElementById('resultsForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        position_1: document.getElementById('position_1').value,
+        position_2: document.getElementById('position_2').value,
+        position_3: document.getElementById('position_3').value
+    };
+    
+    // Validation: Check for duplicates
+    const selected = [formData.position_1, formData.position_2, formData.position_3].filter(v => v);
+    const unique = new Set(selected);
+    
+    if (selected.length !== unique.size) {
+        alert('❌ Error: Same participant cannot be selected for multiple positions!');
+        return;
+    }
+    
+    try {
+        const response = await fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('✅ ' + result.message);
+            window.location.href = '/game-events';
+        } else {
+            alert('❌ ' + result.message);
+        }
+    } catch (error) {
+        alert('❌ Error saving results: ' + error.message);
+    }
+});
+</script>
+{% endblock %}

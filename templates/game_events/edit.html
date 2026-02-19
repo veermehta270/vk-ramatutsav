@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Game Event - Ramat Utsav{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 20px;
+    }
+    
+    .page-header h1 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+    }
+    
+    .page-subtitle {
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #333;
+        font-size: 0.95em;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        font-size: 1em;
+        font-family: inherit;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+    
+    .form-group textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 2px solid #e0e0e0;
+    }
+    
+    .form-actions .btn {
+        flex: 1;
+    }
+    
+    .help-text {
+        font-size: 0.85em;
+        color: #666;
+        margin-top: 4px;
+    }
+    
+    .required {
+        color: #dc3545;
+    }
+    
+    .info-box {
+        background: #e3f2fd;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 0.9em;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Edit Game Event</h1>
+    <p class="page-subtitle">Update event details</p>
+</div>
+
+{% if game_event.participations|length > 0 %}
+<div class="info-box" style="background: #fff3cd; border: 1px solid #ffc107;">
+    <strong>⚠️ Warning:</strong> This event has {{ game_event.participations|length }} registered participant(s). 
+    Changing the game, group, or gender restriction may affect registrations.
+</div>
+{% endif %}
+
+<form method="POST">
+    <div class="form-group">
+        <label for="game_id">Game <span class="required">*</span></label>
+        <select id="game_id" name="game_id" required>
+            {% for game in games %}
+            <option value="{{ game.id }}" {% if game.id == game_event.game_id %}selected{% endif %}>
+                {{ game.name }} ({{ game.game_type }})
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="group_id">Group <span class="required">*</span></label>
+        <select id="group_id" name="group_id" required>
+            {% for group in groups %}
+            <option value="{{ group.id }}" {% if group.id == game_event.group_id %}selected{% endif %}>
+                Group {{ group.name }} (Standards {{ group.standard_from }}-{{ group.standard_to }})
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="gender_restriction">Gender Restriction <span class="required">*</span></label>
+        <select id="gender_restriction" name="gender_restriction" required>
+            <option value="Mixed" {% if game_event.gender_restriction == 'Mixed' %}selected{% endif %}>⚥ Mixed (Both Genders)</option>
+            <option value="Male" {% if game_event.gender_restriction == 'Male' %}selected{% endif %}>♂️ Male Only</option>
+            <option value="Female" {% if game_event.gender_restriction == 'Female' %}selected{% endif %}>♀️ Female Only</option>
+        </select>
+        <div class="help-text">Only students of the selected gender can register for this event</div>
+    </div>
+    
+    <div class="form-group">
+        <label for="location_id">Location <span class="required">*</span></label>
+        <select id="location_id" name="location_id" required>
+            {% for location in locations %}
+            <option value="{{ location.id }}" {% if location.id == game_event.location_id %}selected{% endif %}>
+                {{ location.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label for="scheduled_date">Date <span class="required">*</span></label>
+            <input type="date" id="scheduled_date" name="scheduled_date" required 
+                   value="{{ game_event.scheduled_date.strftime('%Y-%m-%d') }}">
+        </div>
+        
+        <div class="form-group">
+            <label for="scheduled_time">Start Time <span class="required">*</span></label>
+            <input type="time" id="scheduled_time" name="scheduled_time" required 
+                   value="{{ game_event.scheduled_time.strftime('%H:%M') }}">
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label for="end_time">End Time <span class="required">*</span></label>
+        <input type="time" id="end_time" name="end_time" required 
+               value="{{ game_event.end_time.strftime('%H:%M') }}">
+    </div>
+    
+    <div class="form-group">
+        <label for="status">Status <span class="required">*</span></label>
+        <select id="status" name="status" required>
+            <option value="Scheduled" {% if game_event.status == 'Scheduled' %}selected{% endif %}>Scheduled</option>
+            <option value="Ongoing" {% if game_event.status == 'Ongoing' %}selected{% endif %}>Ongoing</option>
+            <option value="Completed" {% if game_event.status == 'Completed' %}selected{% endif %}>Completed</option>
+            <option value="Cancelled" {% if game_event.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes" placeholder="Any special instructions or notes (optional)">{{ game_event.notes or '' }}</textarea>
+    </div>
+    
+    <div class="form-actions">
+        <button type="submit" class="btn">✅ Update Event</button>
+        <a href="/game-events" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}
