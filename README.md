@@ -139,7 +139,18 @@ GameEvent → SubmissionStatus
 
 ## Screenshots
 
-*(Add screenshots here)*
+<img width="1902" height="1003" alt="image" src="https://github.com/user-attachments/assets/df33710f-f92e-436d-bcde-f588a25e6491" />
+
+<img width="1892" height="1040" alt="image" src="https://github.com/user-attachments/assets/2b561f9a-4790-4263-8c41-38568a8012ad" />
+
+<img width="1912" height="987" alt="image" src="https://github.com/user-attachments/assets/3d396abf-0ded-4bd6-b3ff-c1bd98670d8b" />
+
+<img width="1914" height="1039" alt="image" src="https://github.com/user-attachments/assets/70caf6df-9af1-4009-a8b8-cde9a4ed1ff4" />
+
+
+<img width="1906" height="967" alt="image" src="https://github.com/user-attachments/assets/8d7f1d50-b1be-4de2-8e21-169189f46401" />
+
+
 
 ---
 
